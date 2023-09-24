@@ -1,0 +1,59 @@
+{
+    // Please set 'black-formatter.importStrategy' to 'fromEnvironment' in your
+    // workspace (or user) settings to use the same Black version as in the
+    // virtual environment. The Black plugin uses the bundled version by
+    // default.
+    // Not a valid folder-level setting.
+    "black-formatter.importStrategy": "fromEnvironment",
+    // Similar for Ruff, please set 'ruff.importStrategy' to 'fromEnvironment'
+    // in your workspace (or user) settings to use the same Ruff version as in
+    // the virtual environment. The Black plugin uses the bundled version by
+    // default.
+    // Not a valid folder-level setting as well.
+    "ruff.importStrategy": "fromEnvironment",
+
+    // Enable 'editor.formatOnSave' to run black and other formatters on every (manual)
+    // save. Suggested as user-level or workspace-level setting.
+    // "editor.formatOnSave": true,
+
+    // Please set 'pytest.command' in your workspace (or user) settings to load
+    // Pytest from the environment.
+    // Not a valid folder-level setting.
+    "pytest.command": "python -m pytest",
+
+    "files.exclude": {
+        ".coverage": true,
+        ".direnv/": true,
+        ".pytest_cache/": true,
+        ".pytest-cov/": true,
+        ".ruff_cache/": true,
+        "**/__pycache__/": true,
+        "**/.mypy_cache/": true,
+        "**/*.egg-info/": true,
+        "dist/": true,
+    },
+    "files.insertFinalNewline": true,
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.indexing": true,
+    "python.analysis.typeCheckingMode": "strict",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.codeActionsOnSave": {
+            "source.fixAll": true,
+            "source.organizeImports": true,
+        },
+        "editor.rulers": [
+            88, // black's default
+        ],
+    },
+    "python.testing.pytestEnabled": true,
+    "coverage-gutters.coverageFileNames": [
+        "coverage.xml",
+    ],
+    "coverage-gutters.coverageBaseDir": ".pytest-cov",
+    "coverage-gutters.coverageReportFileName": "html/index.html",
+
+    // Mypy extension with dmypy enabled does not always show the same mypy errors as
+    // linter check script.
+    "mypy-type-checker.preferDaemon": false,
+}

@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2023 Gert van Dijk <github@gertvandijk.nl>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+# Stop at first error.
+set -e
+
+# Allow to override path to python interpreter in order to run this from a
+# non-virtualenv aware application like VS Code.
+PYTHON="${PYTHON_INTERPRETER:-python}"
+echo -n "Using Python interpreter at location: $PYTHON "
+echo "(to override specify \$PYTHON_INTERPRETER)"
+
+PYTHON_SOURCES_DIRS=(
+    src/
+    tests/
+)
+
+echo
+echo "Ruff..."
+"$PYTHON" -m ruff --diff "${PYTHON_SOURCES_DIRS[@]}" || \
+    (echo "Run 'ruff --fix ${PYTHON_SOURCES_DIRS[*]}' to fix auto-fixable."; exit 1)
+# Also lint for non-auto-fixables - requires a separate invocation apparently.
+"$PYTHON" -m ruff "${PYTHON_SOURCES_DIRS[@]}"
+echo "OK!"
+
+# Black options are specified in pyproject.toml.
+echo "black..."
+"$PYTHON" -m black --check --diff . || (echo "Run 'black .' to fix."; exit 1)
+echo "OK!"
+
+# Other than '--cache-dir=/dev/null', mypy options are specified in pyproject.toml.
+# Keep in sync with /.vscode/settings.json, key 'python.linting.mypyArgs', except for
+# the '--cache-dir' option.
+# Observed weird inconsistent results with default --cache-dir enabled (mypy 0.971);
+# disable cache explicitly for this script.
+echo "mypy (PyKMP package)..."
+"$PYTHON" -m mypy --cache-dir=/dev/null --package pykmp
+# echo "mypy (PyKMP tests folder)..."
+"$PYTHON" -m mypy --cache-dir=/dev/null ./tests
+echo "OK!"
+
+echo "REUSE lint..."
+"$PYTHON" -m reuse lint -q 2>/dev/null \
+    || (echo "Run 'reuse lint' to view licensing issues."; exit 1)
+echo "OK!"
+
+echo "validate-pyproject..."
+"$PYTHON" -m validate_pyproject pyproject.toml
+echo "OK!"
+
+echo "Everything looks OK! 🎉"

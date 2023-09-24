@@ -1,0 +1,279 @@
+# SPDX-FileCopyrightText: 2023 Gert van Dijk <github@gertvandijk.nl>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+[build-system]
+requires = [
+    "setuptools>=61.0.0",  # For reading all configuration from pyproject.toml
+    "setuptools-scm[toml]>=6.2",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "PyKMP"
+authors = [
+    { name = "Gert van Dijk", email = "github@gertvandijk.nl" },
+]
+description = """Library for the KMP protocol used with Kamstrup electricity/energy \
+    meters (e.g. MULTICAL® 30x/40x/60x)."""
+license = { text = "Apache License 2.0" }
+dynamic = ["version", "readme"]
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",
+]
+dependencies = [
+    "attrs",
+    "crc",
+]
+
+[project.optional-dependencies]
+serial = [
+    "pyserial",
+]
+
+development = [
+    "black>=23.9.1",
+    "build",
+    "check-wheel-contents",
+    "click",
+    "mock_serial",
+    "mypy>=1.5.1",
+    "pyserial",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pytest",
+    "reuse",
+    "ruff>=0.0.291",
+    "setuptools-scm[toml]>=6.2",
+    "twine",
+    "types-pyserial",
+    # Backport Python 3.11 typing features to 3.10: 'assert_type', 'Self'.
+    "typing_extensions",
+    "validate-pyproject[all]",
+]
+
+tool = [
+    "click",
+    "pyserial",
+]
+
+[project.urls]
+homepage = "https://github.com/gertvdijk/PyKMP"
+repository = "https://github.com/gertvdijk/PyKMP.git"
+
+[project.scripts]
+pykmp-tool = "pykmp.tool.__main__:main"
+
+[tool.setuptools]
+license-files = ["LICENSES/*.txt"]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+readme = { file = ["README.md"], content-type = "text/markdown" }
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+
+[tool.ruff]
+src = ["src", "tests"]
+# It's OK to be in preview; this is a project in alpha anyway.
+preview = true
+select = [
+    # List based on all linter rules (prefixes) in version 0.0.290 (`ruff linter`).
+    # Explicit selection is encouraged as per Ruff documentation, opposed to implicit
+    # ["ALL"].
+
+    "F",     # Pyflakes
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "C90",   # mccabe
+    "I",     # isort
+    "N",     # pep8-naming
+    "D",     # pydocstyle
+    "UP",    # pyupgrade
+    "YTT",   # flake8-2020
+    "ANN",   # flake8-annotations
+    "ASYNC", # flake8-async
+    "S",     # flake8-bandit
+    "BLE",   # flake8-blind-except
+    "FBT",   # flake8-boolean-trap
+    "B",     # flake8-bugbear
+    "A",     # flake8-builtins
+    "COM",   # flake8-commas
+    "C4",    # flake8-comprehensions
+    "DTZ",   # flake8-datetimez
+    "T10",   # flake8-debugger
+    "DJ",    # flake8-django
+    "EM",    # flake8-errmsg
+    "EXE",   # flake8-executable
+    "FA",    # flake8-future-annotations
+    "ISC",   # flake8-implicit-str-concat
+    "ICN",   # flake8-import-conventions
+    "G",     # flake8-logging-format
+    "INP",   # flake8-no-pep420
+    "PIE",   # flake8-pie
+    "T20",   # flake8-print
+    "PYI",   # flake8-pyi
+    "PT",    # flake8-pytest-style
+    "Q",     # flake8-quotes
+    "RSE",   # flake8-raise
+    "RET",   # flake8-return
+    "SLF",   # flake8-self
+    "SLOT",  # flake8-slots
+    "SIM",   # flake8-simplify
+    "TID",   # flake8-tidy-imports
+    "TCH",   # flake8-type-checking
+    "INT",   # flake8-gettext
+    "ARG",   # flake8-unused-arguments
+    "PTH",   # flake8-use-pathlib
+    "TD",    # flake8-todos
+    "FIX",   # flake8-fixme
+    "PGH",   # pygrep-hooks
+    "PL",    # Pylint
+    "TRY",   # tryceratops
+    "FLY",   # flynt
+    "NPY",   # NumPy-specific rules
+    "AIR",   # Airflow
+    "PERF",  # Perflint
+    "FURB",  # refurb
+    "LOG",   # flake8-logging
+    "RUF",   # Ruff-specific rules
+
+    # Copyright notices are enforced using 'reuse' for this project.
+    # "CPY",   # Copyright-related rules
+
+    # Disabled for having too many false positives claiming comments are 'dead code'.
+    # https://github.com/astral-sh/ruff/issues/4845
+    # "ERA",   # eradicate
+
+    # Pandas ruleset are trigger happy with false positives and Ruff doesn't have the
+    # conscience of actually using Pandas in the context.
+    # E.g. "Use `.to_numpy()` instead of `.values`"
+    # https://github.com/astral-sh/ruff/issues/6630
+    # "PD",    # pandas-vet
+]
+ignore = [
+    # "Missing type annotation for `self` in method"
+    # "Missing type annotation for `cls` in classmethod"
+    # ... do not make any sense to me. 🤨
+    "ANN101",
+    "ANN102",
+
+    # Conflicts with Black in style of commas used on a single line.
+    # https://github.com/astral-sh/ruff/issues/6525
+    "COM812",
+
+    # Not really to ignore a rule, but to assign the preference of docstring formats.
+    #
+    # > Note that some pydocstyle rules conflict (e.g., D203 and D211) as they represent
+    # > alternative docstring formats.
+    # (https://beta.ruff.rs/docs/configuration/#using-pyprojecttoml)
+    #
+    # - warning: `one-blank-line-before-class` (D203) and `no-blank-line-before-class`
+    #   (D211) are incompatible. Ignoring `one-blank-line-before-class`.
+    # - warning: `multi-line-summary-first-line` (D212) and
+    #   `multi-line-summary-second-line` (D213) are incompatible. Ignoring
+    #   `multi-line-summary-second-line`.
+    "D203",
+    "D212",
+
+    # Style conflicts with Black.
+    # https://github.com/astral-sh/ruff/issues/7259
+    "E203",
+
+    # "Line contains TODO"
+    "FIX002",
+
+    # "Use of assert detected" https://stackoverflow.com/a/68429294/1254292
+    "S101",
+
+    # "Missing author in TODO; try: `# TODO(<author_name>): ...`"
+    "TD002",
+    # "Missing issue link on the line following this TODO"
+    "TD003",
+]
+
+[tool.ruff.per-file-ignores]
+"src/pykmp/tool/**" = [
+    # Docstrings only enforced for the library itself, not the tool.
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D105",
+    "D106",
+    "D107",
+]
+"tests/**" = [
+    # Docstrings style (pydocstyle) only in actual source, not in tests.
+    "D",
+
+    # "SLF001 Private member accessed" is OK in tests.
+    "SLF001",
+
+    # "Relative imports from parent modules are banned"
+    # https://github.com/adamchainz/flake8-tidy-imports#ban-relative-imports
+    # is OK in tests or else it looks like 'tests' is an actual package...
+    "TID252",
+
+    # "Using the global statement to update [...] is discouraged" is OK in tests.
+    "PLW0603",
+]
+"**/__main__.py" = [
+    # Escape sequences are used in docstrings for Click to denote a paragraph should not
+    # be wrapped. https://click.palletsprojects.com/en/8.1.x/api/#click.wrap_text
+    "D301",
+]
+
+[tool.ruff.isort]
+required-imports = [
+    # PEP-563 (new semantics for annotations) is gated behind
+    # 'from __future__ import annotations', including Python 3.10 & 3.11.
+    # https://docs.python.org/3/library/__future__.html#id1
+    "from __future__ import annotations",
+]
+
+[tool.mypy]
+strict = false
+namespace_packages = true
+show_error_codes = true
+show_column_numbers = true
+show_error_context = true
+
+[[tool.mypy.overrides]]
+module = [
+    "crc.*",  # https://github.com/Nicoretti/crc/issues/110
+    "mock_serial.*",
+]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+omit = [
+    # No test coverage for the tool (yet), only for the library.
+    "src/pykmp/tool/**",
+]
+
+[tool.pytest.ini_options]
+# Already move to future-default asyncio strict mode.
+# https://github.com/pytest-dev/pytest-asyncio#modes
+asyncio_mode = "strict"
+addopts = [
+    "--capture=no",  # Do not capture stdout, may hide output in some cases
+    "--durations=5",  # Gain attention to the N slowest tests
+    "--cov=pykmp",
+    "--cov-fail-under=100",
+    "--cov-report=term-missing",
+    "--cov-report=xml:.pytest-cov/coverage.xml",
+    "--cov-report=html:.pytest-cov/html/",
+]
+log_level = "DEBUG"
