@@ -64,18 +64,13 @@ this is confirmed working with the MULTICAL® 403 (IR head positioned upside dow
 
 First of all, you'll need Python 3.10+ (sorry, using modern Python features).
 
-There's no release of this library yet, so I suggest you install the source
-package using `pip` in a virtualenv.
-
-E.g.:
+Then just install `PyKMP' from PyPI, e.g.:
 
 ```
-$ git clone https://github.com/gertvdijk/PyKMP.git
-$ cd PyKMP
-$ python -m venv /tmp/venv
+$ python -m venv /tmp/venv       # create a virtualenv
 $ source /tmp/venv/bin/activate  # every time in a new session to activate this venv
 $ pip install -U pip setuptools  # good idea to have an up-to-date pip & setuptools
-$ pip install .[tool]            # install from source with CLI tool dependencies
+$ pip install PyKMP[tool]        # install with CLI tool dependencies
 ```
 
 > [!NOTE]\
