@@ -68,7 +68,7 @@ class OutOfRangeError(BaseCodecError):
             # case. Looks like https://github.com/python/mypy/issues/12364.
             # Pyright is right here, so suppress that one.
             case _:  # pyright: ignore[reportUnnecessaryComparison]  # pragma: nocover
-                raise RuntimeError  # pragma: nocover
+                raise TypeError  # pragma: nocover
 
 
 @attrs.define(kw_only=True)
