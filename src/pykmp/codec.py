@@ -56,9 +56,6 @@ class OutOfRangeError(BaseCodecError):
     valid_range: tuple[int, int] | tuple[int, None] | tuple[None, int]  # inclusive
     actual: int
 
-    # Suppressed mypy error should be fixed soon with:
-    # https://github.com/python/mypy/commit/5af76714fa2c526007e045f9c834781f60660e6e
-    # https://github.com/python/mypy/issues/12534
     def __str__(self) -> str:  # noqa: D105
         match self.valid_range:
             case (int(lower), int(upper)):
@@ -68,7 +65,7 @@ class OutOfRangeError(BaseCodecError):
             case (int(lower), None):
                 return f"{self.what} is under minimum of {lower}: {self.actual}."
             # Instead of a 'type: ignore[return]', help mypy with an unreachable default
-            # case. Similar bug as https://github.com/python/mypy/issues/12534.
+            # case. Looks like https://github.com/python/mypy/issues/12364.
             # Pyright is right here, so suppress that one.
             case _:  # pyright: ignore[reportUnnecessaryComparison]  # pragma: nocover
                 raise RuntimeError  # pragma: nocover
