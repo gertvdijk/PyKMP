@@ -244,7 +244,7 @@ required-imports = [
 ]
 
 [tool.mypy]
-strict = false
+strict = true
 namespace_packages = true
 show_error_codes = true
 show_column_numbers = true
