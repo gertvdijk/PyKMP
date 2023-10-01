@@ -1,0 +1,130 @@
+# SPDX-FileCopyrightText: 2023 Gert van Dijk <github@gertvandijk.nl>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+site_name: PyKMP
+
+repo_url: https://github.com/gertvdijk/PyKMP
+repo_name: gertvdijk/PyKMP
+
+nav:
+  - Home: index.md
+  - getting-started.md
+  - hardware-requirements.md
+  - battery-consumption.md
+  - ser2net.md
+  - troubleshooting.md
+  - thanks.md
+  - Use cases:
+    - store-graph-metrics.md
+  - Development:
+    - API reference:
+      - api/index.md
+      - Client: api/client.md
+      - Messages: api/messages.md
+      - Codec: api/codec.md
+      - Constants: api/constants.md
+    - contributing.md
+    - resources.md
+
+theme:
+  name: material
+  icon:
+    logo: material/meter-electric
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: deep purple
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: brown
+      accent: deep orange
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - content.code.annotate
+    - navigation.expand
+    - navigation.footer
+    - navigation.sections
+    - navigation.tracking
+
+copyright: Copyright &copy; 2023 Gert van Dijk
+
+extra:
+  social:
+    - icon: fontawesome/brands/mastodon
+      link: https://mastodon.social/@gertvdijk
+      name: Gert van Dijk on Mastodon
+    - icon: fontawesome/solid/square
+      link: https://bsky.app/profile/i6t.nl
+      name: Gert van Dijk on Bluesky
+    - icon: fontawesome/brands/github
+      link: https://github.com/gertvdijk/
+      name: Gert van Dijk on GitHub
+    - icon: simple/pypi  # fontawesome/brands/python
+      link: https://pypi.org/project/PyKMP/
+      name: PyKMP on PyPI.org
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - footnotes
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - toc:
+      # Together with mkdocstrings 'heading_level: 3' hide deeper objects from ToC.
+      toc_depth: 3
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["src/"]
+          options:
+            group_by_category: true
+            heading_level: 3
+            inherited_members: true
+            line_length: 88
+            members_order: source
+            show_if_no_docstring: true
+            show_root_heading: true
+            show_signature_annotations: true
+            show_source: false
+            # Insiders only at the time of writing (mkdocstrings/python 1.7.1).
+            # signature_crossrefs: true
+            # # also set:
+            # # separate_signature: true
+            # show_symbol_type_heading: true
+            # show_symbol_type_toc: true
+  - search:
+      lang: en
+
+watch:
+  - "src/"
+  - "docs/"
+
+strict: true
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn

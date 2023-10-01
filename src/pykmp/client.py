@@ -2,7 +2,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-"""Convenience in client communication with the KMP protocol (to meter)."""
+"""
+Convenience in client communication with the KMP protocol (to meter).
+
+The [PySerialClientCommunicator][pykmp.client.PySerialClientCommunicator] provides the
+most high-level class to communicate with the meter.
+"""
 
 from __future__ import annotations
 
