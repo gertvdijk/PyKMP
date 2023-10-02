@@ -19,7 +19,7 @@ the owners of this repository before making a change.
     `git clone https://github.com/gertvdijk/PyKMP.git`) and change your current
     directory in the project root.
 
-1. Create a clean Python 3.10.x/3.11.x virtual environment and activate it.
+1. Create a clean Python 3.10.x/3.11.x/3.12.x virtual environment and activate it.
     Suggested way is to install [direnv][direnv-home] together with
     [Pyenv][pyenv-github] and use the project-supplied `.envrc` (`direnv allow`).
 
