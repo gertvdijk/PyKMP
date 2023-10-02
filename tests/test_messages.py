@@ -594,7 +594,7 @@ NUM_REGISTERS_MAX = GetRegisterRequest.NUM_REGISTERS_MAX
             codec.OutOfRangeError,
             (
                 "Number of registers requested in GetRegister request is out of range "
-                f"[1,{NUM_REGISTERS_MAX}]: {NUM_REGISTERS_MAX+1}."
+                f"[1,{NUM_REGISTERS_MAX}]: {NUM_REGISTERS_MAX + 1}."
             ),
             id="too many",
         ),

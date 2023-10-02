@@ -53,7 +53,7 @@ development = [
     "pytest-cov",
     "pytest",
     "reuse",
-    "ruff>=0.0.291",
+    "ruff>=0.0.292",
     "setuptools-scm[toml]>=6.2",
     "twine",
     "types-pyserial",

@@ -335,7 +335,7 @@ class GetSerialResponse(
     SERIAL_LENGTH_ENCODED: ClassVar[int] = 4
     SERIAL_VALUE_MAX: ClassVar[int] = (2 ** (SERIAL_LENGTH_ENCODED * 8)) - 1
 
-    @serial.validator  # pyright: ignore[reportUnknownMemberType, reportUntypedFunctionDecorator, reportGeneralTypeIssues]  # noqa: E501
+    @serial.validator  # pyright: ignore[reportUnknownMemberType, reportUntypedFunctionDecorator, reportGeneralTypeIssues]
     def digits_only_validator(self, _: attrs.Attribute[Self], value: str) -> None:
         """Validate all characters in string of serial number are digits."""
         try:
@@ -426,7 +426,7 @@ class GetRegisterRequest(
     REGISTER_ID_LENGTH_ENCODED: ClassVar[int] = 2
     REGISTER_ID_VALUE_MAX: ClassVar[int] = (2 ** (REGISTER_ID_LENGTH_ENCODED * 8)) - 1
 
-    @registers.validator  # pyright: ignore[reportUnknownMemberType, reportUntypedFunctionDecorator, reportGeneralTypeIssues]  # noqa: E501
+    @registers.validator  # pyright: ignore[reportUnknownMemberType, reportUntypedFunctionDecorator, reportGeneralTypeIssues]
     def register_id_validator(
         self, _: attrs.Attribute[Self], value: Collection[RegisterID]
     ) -> None:
