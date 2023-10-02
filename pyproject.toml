@@ -58,7 +58,7 @@ development = [
     "twine",
     "types-pyserial",
     # Backport Python 3.11 typing features to 3.10: 'assert_type', 'Self'.
-    "typing_extensions",
+    "typing_extensions; python_version < '3.11'",
     "validate-pyproject[all]",
 ]
 
