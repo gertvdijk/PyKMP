@@ -21,9 +21,10 @@ the owners of this repository before making a change.
 
 1. Create a clean Python 3.10.x/3.11.x/3.12.x virtual environment and activate it.
     Suggested way is to install [direnv][direnv-home] together with
-    [Pyenv][pyenv-github] and use the project-supplied `.envrc` (`direnv allow`).
+    [Pyenv][pyenv-github] and enable the project-supplied example `.envrc`.
 
     ```console
+    $ ln -s .envrc-example .envrc
     $ direnv allow
     ```
 

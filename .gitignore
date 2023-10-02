@@ -11,3 +11,4 @@ __pycache__/
 /.coverage
 /.pytest-cov
 /site/
+.envrc
