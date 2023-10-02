@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.2">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.3">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.d451bc0e.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.79e020e9.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.a5377069.min.css">
@@ -694,6 +694,34 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#pykmp.codec.PhysicalBytes" class="md-nav__link">
+    PhysicalBytes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pykmp.codec.DataLinkBytes" class="md-nav__link">
+    DataLinkBytes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pykmp.codec.ApplicationBytes" class="md-nav__link">
+    ApplicationBytes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pykmp.codec.ApplicationDataBytes" class="md-nav__link">
+    ApplicationDataBytes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#pykmp.codec.ApplicationData" class="md-nav__link">
     ApplicationData
   </a>
@@ -953,6 +981,34 @@
   
     <nav class="md-nav" aria-label="Data classes & types">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pykmp.codec.PhysicalBytes" class="md-nav__link">
+    PhysicalBytes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pykmp.codec.DataLinkBytes" class="md-nav__link">
+    DataLinkBytes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pykmp.codec.ApplicationBytes" class="md-nav__link">
+    ApplicationBytes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pykmp.codec.ApplicationDataBytes" class="md-nav__link">
+    ApplicationDataBytes
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#pykmp.codec.ApplicationData" class="md-nav__link">
@@ -1700,6 +1756,94 @@ decimal.Decimal from the regular <code>decode()</code> method.</p>
 
 </div><h2 id="data-classes-types">Data classes &amp; types</h2>
 
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h3 id="pykmp.codec.PhysicalBytes" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pykmp</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">PhysicalBytes</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;PhysicalBytes&#39;</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Distinct type (bytes) representing serialized bytes on the physical layer.</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h3 id="pykmp.codec.DataLinkBytes" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pykmp</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">DataLinkBytes</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;DataLinkBytes&#39;</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Distinct type (bytes) representing serialized bytes on the data link layer.</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h3 id="pykmp.codec.ApplicationBytes" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pykmp</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">ApplicationBytes</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;ApplicationBytes&#39;</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Distinct type (bytes) representing serialized data on the application layer.</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h3 id="pykmp.codec.ApplicationDataBytes" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pykmp</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">ApplicationDataBytes</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s1">&#39;ApplicationDataBytes&#39;</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Distinct type (bytes) representing serialized application (message) data.</p>
+  </div>
+
+</div>
 
 <div class="doc doc-object doc-class">
 
@@ -2663,10 +2807,11 @@ is inclusive.</p>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
+    
     <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "navigation.expand", "navigation.footer", "navigation.sections", "navigation.tracking"], "search": "../../assets/javascripts/workers/search.a264c092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.726fbb30.min.js"></script>
+      <script src="../../assets/javascripts/bundle.6eac0284.min.js"></script>
       
     
   </body>
