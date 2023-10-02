@@ -69,7 +69,7 @@ tool = [
 ]
 
 [project.urls]
-homepage = "https://github.com/gertvdijk/PyKMP"
+homepage = "https://gertvdijk.github.io/PyKMP/"
 repository = "https://github.com/gertvdijk/PyKMP.git"
 
 [project.scripts]
