@@ -8,7 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 This project's existence is mainly thanks to all the information and regarding the KMP
 protocol people have put online over the years.
 
-The MeterLogger project have left [some notes][meterlogger-wiki-kmp]for the development
+The MeterLogger project have left [some notes][meterlogger-wiki-kmp] for the development
 of the MeterLogger for Kamstrup meters.
 Also the work by Poul-Henning Kamp (and later Ronald van der Meer) in
 [GitHub: `ronaldvdmeer/multical402-4-domoticz`][github-ronaldvdmeer-multical402] was
