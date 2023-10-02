@@ -30,9 +30,16 @@ logger = logging.getLogger(__name__)
 
 
 PhysicalBytes = NewType("PhysicalBytes", bytes)
+"""Distinct type (bytes) representing serialized bytes on the physical layer."""
+
 DataLinkBytes = NewType("DataLinkBytes", bytes)
+"""Distinct type (bytes) representing serialized bytes on the data link layer."""
+
 ApplicationBytes = NewType("ApplicationBytes", bytes)
+"""Distinct type (bytes) representing serialized data on the application layer."""
+
 ApplicationDataBytes = NewType("ApplicationDataBytes", bytes)
+"""Distinct type (bytes) representing serialized application (message) data."""
 
 
 class AckReceivedException(Exception):  # noqa: N818

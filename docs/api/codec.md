@@ -20,6 +20,10 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Data classes & types
 
+::: pykmp.codec.PhysicalBytes
+::: pykmp.codec.DataLinkBytes
+::: pykmp.codec.ApplicationBytes
+::: pykmp.codec.ApplicationDataBytes
 ::: pykmp.codec.ApplicationData
 ::: pykmp.codec.DataLinkData
 ::: pykmp.codec.PhysicalDirection
