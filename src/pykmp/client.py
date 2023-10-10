@@ -60,13 +60,14 @@ class EncodedClientResponse(Generic[CCReq_t_co]):
     request_cls: type[CCReq_t_co]
 
 
+DESTINATION_ADDRESS_DEFAULT = constants.DestinationAddress.HEAT_METER.value
+
+
 @attrs.define(kw_only=True, auto_attribs=False)
 class ClientCodec:
     """Wires up the codecs of all layers for communication *to the meter*."""
 
-    destination_address: int = attrs.field(
-        default=constants.DestinationAddress.HEAT_METER.value
-    )
+    destination_address: int = attrs.field(default=DESTINATION_ADDRESS_DEFAULT)
     application_codec: codec.ApplicationCodec = attrs.field(
         factory=codec.ApplicationCodec
     )
@@ -108,9 +109,6 @@ class ClientCodec:
             data_link_data.application_bytes
         )
         return frame.request_cls.get_response_type().decode(application_data)
-
-
-DESTINATION_ADDRESS_DEFAULT = attrs.fields(ClientCodec).destination_address.default
 
 
 class ClientCommunicator(Protocol):
