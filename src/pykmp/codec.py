@@ -22,7 +22,7 @@ import math
 from typing import Any, Final, Literal, NewType, cast
 
 import attrs
-import crc  # pyright: ignore [reportMissingTypeStubs]
+import crc
 
 from . import constants
 

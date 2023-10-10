@@ -44,6 +44,7 @@ development = [
     "build",
     "check-wheel-contents",
     "click",
+    "crc>=5.0.0",  # typed since 5.0.0
     "mkdocs-material",
     "mkdocs",
     "mkdocstrings[python]>=0.23",
@@ -255,7 +256,6 @@ show_error_context = true
 
 [[tool.mypy.overrides]]
 module = [
-    "crc.*",  # https://github.com/Nicoretti/crc/issues/110
     "mock_serial.*",
 ]
 ignore_missing_imports = true
