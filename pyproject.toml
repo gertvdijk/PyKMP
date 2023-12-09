@@ -40,16 +40,16 @@ serial = [
 ]
 
 development = [
-    "black>=23.9.1",
+    "black>=23.11.0",
     "build",
-    "check-wheel-contents",
+    "check-wheel-contents>=0.6.0",
     "click",
     "crc>=5.0.0",  # typed since 5.0.0
     "mkdocs-material",
     "mkdocs",
     "mkdocstrings[python]>=0.23",
     "mock_serial",
-    "mypy>=1.6.0",
+    "mypy>=1.7.1",
     "pyserial",
     "pytest-asyncio",
     "pytest-cov",
