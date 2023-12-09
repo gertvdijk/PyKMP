@@ -40,8 +40,8 @@
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.codeActionsOnSave": {
-            "source.fixAll": true,
-            "source.organizeImports": true,
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
         },
         "editor.rulers": [
             88, // black's default
