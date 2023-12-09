@@ -55,7 +55,7 @@ development = [
     "pytest-cov",
     "pytest",
     "reuse",
-    "ruff>=0.0.292",
+    "ruff>=0.1.7",
     "setuptools-scm[toml]>=6.2",
     "twine",
     "types-pyserial",
@@ -109,6 +109,7 @@ select = [
     "YTT",   # flake8-2020
     "ANN",   # flake8-annotations
     "ASYNC", # flake8-async
+    "TRIO",  # flake8-trio
     "S",     # flake8-bandit
     "BLE",   # flake8-blind-except
     "FBT",   # flake8-boolean-trap
