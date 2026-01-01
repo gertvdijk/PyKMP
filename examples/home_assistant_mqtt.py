@@ -94,8 +94,11 @@ class Settings:
 @dataclass(slots=True)
 class RegisterReading:
     id_: int
+    id_hex: str
     name: str
     unit: str
+    unit_int: int
+    unit_hex: str
     value: float
     text: str
 
@@ -143,8 +146,11 @@ def read_registers(settings: Settings) -> list[RegisterReading]:
         readings.append(
             RegisterReading(
                 id_=reg.id_,
+                id_hex=f"0x{reg.id_:04X}",
                 name=name,
                 unit=unit,
+                unit_int=reg.unit,
+                unit_hex=f"0x{reg.unit:02X}",
                 value=float(value_dec),
                 text=str(value_dec),
             )
@@ -234,6 +240,19 @@ def publish_registers(
         }
         for reading in readings
     }
+    register_data_payload = [
+        {
+            "id_int": reading.id_,
+            "id_hex": reading.id_hex,
+            "name": reading.name,
+            "unit_int": reading.unit_int,
+            "unit_hex": reading.unit_hex,
+            "unit_str": reading.unit,
+            "value_float": reading.value,
+            "value_str": reading.text,
+        }
+        for reading in readings
+    ]
     client.publish(
         f"{settings.mqtt_base_topic}/state",
         json.dumps(
@@ -241,6 +260,7 @@ def publish_registers(
                 "serial": serial,
                 "timestamp": timestamp,
                 "registers": summary,
+                "register_data": register_data_payload,
             }
         ),
         retain=settings.mqtt_retain,
@@ -254,9 +274,14 @@ def publish_registers(
                     "serial": serial,
                     "timestamp": timestamp,
                     "id": reading.id_,
+                    "id_hex": reading.id_hex,
                     "name": reading.name,
                     "unit": reading.unit,
+                    "unit_int": reading.unit_int,
+                    "unit_hex": reading.unit_hex,
                     "value": reading.value,
+                    "value_float": reading.value,
+                    "value_str": reading.text,
                     "text": reading.text,
                 }
             ),

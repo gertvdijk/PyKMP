@@ -61,8 +61,30 @@ Make sure the chosen `User` is allowed to talk to the meter (e.g. a member of th
 
 - Serial number once on startup: `<MQTT_BASE_TOPIC>/serial`
 - All registers together: `<MQTT_BASE_TOPIC>/state`
-- Per-register states (JSON, retained): `<MQTT_BASE_TOPIC>/register/<id>`
-- MQTT discovery (when `MQTT_DISCOVERY=true`): `homeassistant/sensor/pykmp_<serial>_<id>/config`
+  - Per-register states (JSON, retained): `<MQTT_BASE_TOPIC>/register/<id>`
+  - MQTT discovery (when `MQTT_DISCOVERY=true`): `homeassistant/sensor/pykmp_<serial>_<id>/config`
+
+The state payload now includes both a compact map and a `register_data` list that mirrors
+`pykmp-tool get-register --json`, for example:
+
+```json
+{
+  "serial": "123456",
+  "timestamp": "2024-04-12T12:00:00Z",
+  "register_data": [
+    {
+      "id_int": 60,
+      "id_hex": "0x003C",
+      "name": "Heat Energy (E1)",
+      "unit_int": 2,
+      "unit_hex": "0x02",
+      "unit_str": "kWh",
+      "value_float": 135152.0,
+      "value_str": "135152"
+    }
+  ]
+}
+```
 
 Home Assistant will create one sensor per register via the discovery payloads. If you
 prefer manual sensors, point them at the per-register topics above.
