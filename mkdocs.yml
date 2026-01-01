@@ -16,6 +16,7 @@ nav:
   - troubleshooting.md
   - thanks.md
   - Use cases:
+    - home-assistant-mqtt.md
     - store-graph-metrics.md
   - Development:
     - API reference:
