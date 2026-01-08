@@ -76,6 +76,9 @@ The state payload now includes both a compact map and a `register_data` list tha
       "id_int": 60,
       "id_hex": "0x003C",
       "name": "Heat Energy (E1)",
+      "device_class": "energy",
+      "state_class": "total_increasing",
+      "unit_of_measurement": "kWh",
       "unit_int": 2,
       "unit_hex": "0x02",
       "unit_str": "kWh",
@@ -85,6 +88,9 @@ The state payload now includes both a compact map and a `register_data` list tha
   ]
 }
 ```
+
+MQTT discovery payloads now also include `device_class` and `state_class` when the unit
+is recognized (e.g., energy, volume, temperature, power, flow).
 
 Home Assistant will create one sensor per register via the discovery payloads. If you
 prefer manual sensors, point them at the per-register topics above.

@@ -103,6 +103,26 @@ class RegisterReading:
     text: str
 
 
+HA_CLASS_BY_UNIT: dict[str, tuple[str | None, str | None]] = {
+    "Wh": ("energy", "total_increasing"),
+    "kWh": ("energy", "total_increasing"),
+    "MWh": ("energy", "total_increasing"),
+    "GWh": ("energy", "total_increasing"),
+    "W": ("power", "measurement"),
+    "kW": ("power", "measurement"),
+    "MW": ("power", "measurement"),
+    "GW": ("power", "measurement"),
+    "°C": ("temperature", "measurement"),
+    "m³": ("volume", "total_increasing"),
+    "l": ("volume", "total_increasing"),
+    "l/h": ("volume_flow_rate", "measurement"),
+    "m³/h": ("volume_flow_rate", "measurement"),
+    "bar": ("pressure", "measurement"),
+    "V": ("voltage", "measurement"),
+    "A": ("current", "measurement"),
+}
+
+
 def read_serial(settings: Settings) -> str | None:
     try:
         communicator = PySerialClientCommunicator(serial_device=settings.serial_device)
@@ -197,6 +217,7 @@ def publish_discovery(
             f"{settings.mqtt_discovery_prefix}/sensor/{unique_id}/config"
         )
         state_topic = f"{settings.mqtt_base_topic}/register/{reading.id_}"
+        device_class, state_class = HA_CLASS_BY_UNIT.get(reading.unit, (None, None))
         payload = {
             "name": f"{reading.name}",
             "state_topic": state_topic,
@@ -206,6 +227,10 @@ def publish_discovery(
             "device": device,
             "expire_after": settings.interval_seconds * 2,
         }
+        if device_class:
+            payload["device_class"] = device_class
+        if state_class:
+            payload["state_class"] = state_class
         client.publish(
             config_topic,
             json.dumps(payload),
@@ -250,6 +275,9 @@ def publish_registers(
             "unit_str": reading.unit,
             "value_float": reading.value,
             "value_str": reading.text,
+            "unit_of_measurement": reading.unit,
+            "device_class": HA_CLASS_BY_UNIT.get(reading.unit, (None, None))[0],
+            "state_class": HA_CLASS_BY_UNIT.get(reading.unit, (None, None))[1],
         }
         for reading in readings
     ]
@@ -279,6 +307,9 @@ def publish_registers(
                     "unit": reading.unit,
                     "unit_int": reading.unit_int,
                     "unit_hex": reading.unit_hex,
+                    "unit_of_measurement": reading.unit,
+                    "device_class": HA_CLASS_BY_UNIT.get(reading.unit, (None, None))[0],
+                    "state_class": HA_CLASS_BY_UNIT.get(reading.unit, (None, None))[1],
                     "value": reading.value,
                     "value_float": reading.value,
                     "value_str": reading.text,
