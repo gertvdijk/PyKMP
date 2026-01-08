@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import decimal
 import json
 import logging
 import os
@@ -101,9 +102,13 @@ class RegisterReading:
     unit_hex: str
     value: float
     text: str
+    ha_unit: str
+    ha_value: float
+    ha_value_str: str
 
 
 HA_CLASS_BY_UNIT: dict[str, tuple[str | None, str | None]] = {
+    # Only HA-supported unit/device_class combos to avoid warnings.
     "Wh": ("energy", "total_increasing"),
     "kWh": ("energy", "total_increasing"),
     "MWh": ("energy", "total_increasing"),
@@ -114,8 +119,6 @@ HA_CLASS_BY_UNIT: dict[str, tuple[str | None, str | None]] = {
     "GW": ("power", "measurement"),
     "°C": ("temperature", "measurement"),
     "m³": ("volume", "total_increasing"),
-    "l": ("volume", "total_increasing"),
-    "l/h": ("volume_flow_rate", "measurement"),
     "m³/h": ("volume_flow_rate", "measurement"),
     "bar": ("pressure", "measurement"),
     "V": ("voltage", "measurement"),
@@ -163,6 +166,11 @@ def read_registers(settings: Settings) -> list[RegisterReading]:
         name = constants.REGISTERS.get(reg.id_, f"Register {reg.id_}")
         unit = constants.UNITS_NAMES.get(reg.unit, f"unit-{reg.unit}")
         value_dec = FloatCodec.decode(reg.value)
+        ha_unit = unit
+        ha_value_dec = value_dec
+        if unit == "l/h":
+            ha_unit = "m³/h"
+            ha_value_dec = value_dec / decimal.Decimal("1000")
         readings.append(
             RegisterReading(
                 id_=reg.id_,
@@ -173,6 +181,9 @@ def read_registers(settings: Settings) -> list[RegisterReading]:
                 unit_hex=f"0x{reg.unit:02X}",
                 value=float(value_dec),
                 text=str(value_dec),
+                ha_unit=ha_unit,
+                ha_value=float(ha_value_dec),
+                ha_value_str=str(ha_value_dec),
             )
         )
     return readings
@@ -217,12 +228,12 @@ def publish_discovery(
             f"{settings.mqtt_discovery_prefix}/sensor/{unique_id}/config"
         )
         state_topic = f"{settings.mqtt_base_topic}/register/{reading.id_}"
-        device_class, state_class = HA_CLASS_BY_UNIT.get(reading.unit, (None, None))
+        device_class, state_class = HA_CLASS_BY_UNIT.get(reading.ha_unit, (None, None))
         payload = {
             "name": f"{reading.name}",
             "state_topic": state_topic,
             "value_template": "{{ value_json.value }}",
-            "unit_of_measurement": reading.unit,
+            "unit_of_measurement": reading.ha_unit,
             "unique_id": unique_id,
             "device": device,
             "expire_after": settings.interval_seconds * 2,
@@ -259,9 +270,12 @@ def publish_registers(
     timestamp = datetime.now(timezone.utc).isoformat()
     summary = {
         str(reading.id_): {
-            "value": reading.value,
-            "text": reading.text,
-            "unit": reading.unit,
+            "value": reading.ha_value,
+            "text": reading.ha_value_str,
+            "unit": reading.ha_unit,
+            "raw_value": reading.value,
+            "raw_text": reading.text,
+            "raw_unit": reading.unit,
         }
         for reading in readings
     }
@@ -276,8 +290,11 @@ def publish_registers(
             "value_float": reading.value,
             "value_str": reading.text,
             "unit_of_measurement": reading.unit,
-            "device_class": HA_CLASS_BY_UNIT.get(reading.unit, (None, None))[0],
-            "state_class": HA_CLASS_BY_UNIT.get(reading.unit, (None, None))[1],
+            "device_class": HA_CLASS_BY_UNIT.get(reading.ha_unit, (None, None))[0],
+            "state_class": HA_CLASS_BY_UNIT.get(reading.ha_unit, (None, None))[1],
+            "ha_unit": reading.ha_unit,
+            "ha_value_float": reading.ha_value,
+            "ha_value_str": reading.ha_value_str,
         }
         for reading in readings
     ]
@@ -304,16 +321,19 @@ def publish_registers(
                     "id": reading.id_,
                     "id_hex": reading.id_hex,
                     "name": reading.name,
-                    "unit": reading.unit,
+                    "unit": reading.ha_unit,
                     "unit_int": reading.unit_int,
                     "unit_hex": reading.unit_hex,
-                    "unit_of_measurement": reading.unit,
-                    "device_class": HA_CLASS_BY_UNIT.get(reading.unit, (None, None))[0],
-                    "state_class": HA_CLASS_BY_UNIT.get(reading.unit, (None, None))[1],
-                    "value": reading.value,
-                    "value_float": reading.value,
-                    "value_str": reading.text,
-                    "text": reading.text,
+                    "unit_of_measurement": reading.ha_unit,
+                    "device_class": HA_CLASS_BY_UNIT.get(reading.ha_unit, (None, None))[0],
+                    "state_class": HA_CLASS_BY_UNIT.get(reading.ha_unit, (None, None))[1],
+                    "value": reading.ha_value,
+                    "value_float": reading.ha_value,
+                    "value_str": reading.ha_value_str,
+                    "text": reading.ha_value_str,
+                    "raw_value": reading.value,
+                    "raw_value_str": reading.text,
+                    "raw_unit": reading.unit,
                 }
             ),
             retain=settings.mqtt_retain,

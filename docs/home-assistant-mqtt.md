@@ -90,7 +90,9 @@ The state payload now includes both a compact map and a `register_data` list tha
 ```
 
 MQTT discovery payloads now also include `device_class` and `state_class` when the unit
-is recognized (e.g., energy, volume, temperature, power, flow).
+is recognized (e.g., energy, power, temperature, volume, flow). For flow the script
+now converts `l/h` to `m³/h` so Home Assistant accepts the unit; raw values and units
+are still included alongside the converted values.
 
 Home Assistant will create one sensor per register via the discovery payloads. If you
 prefer manual sensors, point them at the per-register topics above.
