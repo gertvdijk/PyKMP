@@ -117,6 +117,14 @@ UNITS_NAMES: Final[Mapping[int, str]] = {
     62: "days",
     63: "RTC-Q",
     64: "Datetime",
+    65: "imp/l",
+    66: "l/imp",
+    85: "%RH",
+    86: "%O\N{SUBSCRIPT TWO}",
+    87: "m/s",
+    88: "kJ/kg",
+    89: "pH",
+    90: "g/kg",
 }
 
 
