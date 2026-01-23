@@ -90,7 +90,7 @@ UNITS_NAMES: Final[Mapping[int, str]] = {
     35: "kV",
     36: "kA",
     37: "°C",
-    38: "°K",
+    38: "K",
     39: "l",
     40: "m³",
     41: "l/h",
