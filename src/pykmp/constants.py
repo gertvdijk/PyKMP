@@ -73,7 +73,7 @@ UNITS_NAMES: Final[Mapping[int, str]] = {
     18: "kVAh",
     19: "MVAh",
     20: "GVAh",
-    21: "kW",
+    21: "W",
     22: "kW",
     23: "MW",
     24: "GW",
