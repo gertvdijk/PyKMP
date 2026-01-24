@@ -17,15 +17,40 @@ if TYPE_CHECKING:
 # Register display names as used with GetRegister command request/response (CID=0x10)
 REGISTERS: Final[Mapping[int, str]] = {
     60: "Heat Energy (E1)",
+    61: "Inlet Energy E4",
+    62: "Outlet Energy E5",
+    63: "Cooling Energy E3",
+    64: "Tariff TA2",
+    65: "Tariff TA3",
+    66: "Tariff limit 2",
+    67: "Tariff limit 3",
     68: "Volume V1",
+    69: "Volume V2",
+    72: "Mass M1",
+    73: "Mass M2",
     74: "Flow V1",
+    75: "Flow V2",
     80: "Current Power",
+    84: "Pulse input A1",
+    85: "Pulse input B1",
     86: "Temp1",
     87: "Temp2",
+    88: "Temp3",
     89: "Tempdiff",
+    91: "Pressure P1",
+    92: "Pressure P2",
+    94: "Heat Energy E2",
+    95: "Tap water energy E6",
+    96: "Tap water energy E7",
     97: "Temp1xm3 E8",  # V1 * t1 (inlet)
+    98: "Target Date",
+    99: "InfoCode",
+    104: "Meter number for VB",
     110: "Temp2xm3 E9",  # V2 * t2 (outlet)
+    112: "Customer number 2",  # 8 most-significant digits
     113: "Infoevent",
+    114: "Meter number for VA",
+    122: "Temp4",
     123: "MaxFlowDate_Y",
     124: "MaxFlow_Y",
     125: "MinFlowDate_Y",
@@ -46,8 +71,81 @@ REGISTERS: Final[Mapping[int, str]] = {
     147: "AvgTemp2_Y",
     149: "AvgTemp1_M",
     150: "AvgTemp2_M",
+    152: "Program number",  # not seen on meters: ABCCCCCC
+    153: "Config number 1",  # config no. DDDEE
+    154: "Software Checksum 1",
+    168: "Config number 2",  # config no. FFGGMN
+    175: "Error hour counter",
+    178: "Differential energy dE",
+    179: "Control energy cE",
+    180: "Differential volume dV",
+    181: "Control volume cV",
+    # 183: looks like a meter S/N on Multical 603
+    184: "MbusPriAdrMod1",
+    185: "MbusSekAdrMod1",
+    218: "MbusPriAdrMod2",
+    219: "MbusSekAdrMod2",
+    222: "ConfigChangedEventCount",
+    224: "Pulse input A2",
+    225: "Pulse input B2",
+    228: "Config number 3",
+    229: "T1_average_autoint",
+    230: "T2_average_autoint",
+    234: "l/imp for VA",
+    235: "l/imp for VB",
+    239: "Volume V1 hires",
+    # Undocumented (259 and 260), but it matches the info given by Multical 603 in the
+    # diagnostics display
+    259: "Nominal Q\N{LATIN SUBSCRIPT SMALL LETTER P} V1",
+    260: "Nominal Q\N{LATIN SUBSCRIPT SMALL LETTER P} V2",
     266: "E1HighRes",
+    267: "Cooling energy E3 hires",
+    346: "Module SW rev",
+    347: "Customer number",
+    348: "Date and Time",  # TODO: unknown unit 79, 28591984415535
+    355: "COP Year",
+    362: "Tariff TA4",
+    364: "Heat energy A1",  # Heat energy with discount A1, t2 < t5 limit
+    365: "Heat energy A2",  # Heat energy with surcharge A2, t2 > t5 limit
+    366: "T5 limit",
+    367: "COP Month",
+    368: "Config number 4",
+    369: "Info bits",
+    371: "COP",
+    372: "Power input B1",
+    379: "T1 time average day",
+    380: "T2 time average day",
+    381: "T1 time average hour",
+    382: "T2 time average hour",
+    383: "Flow V1 max year date",
+    # 384: something similar as 383?
+    385: "Power max year date",
+    # 386: something similar as 385?
+    387: "Flow V1 max month date",
+    # 388: something similar as 387?
+    389: "Power max month date",
+    # 390: something similar as 389?
+    398: "T1 actual (one decimal)",
+    399: "T2 actual (one decimal)",
+    400: "T1-T2 (one decimal)",  # Undocumented, but appears as such on Multical 603
+    404: "Meter Type",
+    473: "Energy E10",
+    474: "Energy E11",
+    477: "T3 time average day",
+    478: "T3 time average hour",
+    505: "P1 average day",
+    506: "P2 average day",
+    507: "P1 average hour",
+    508: "P2 average hour",
+    # Undocumented, but it matches the actual interval on Multical 303
+    675: "wM-Bus transmission interval",
+    1001: "Fabrication No",
+    1002: "Time",
+    1003: "Date",
     1004: "HourCounter",
+    1005: "Software edition",
+    1010: "Customer number 1",  # 8 least-significant digits
+    1032: "Operation Mode",
 }
 
 
