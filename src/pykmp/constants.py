@@ -17,8 +17,8 @@ if TYPE_CHECKING:
 # Register display names as used with GetRegister command request/response (CID=0x10)
 REGISTERS: Final[Mapping[int, str]] = {
     60: "Heat Energy (E1)",
-    68: "Volume",
-    74: "Flow",
+    68: "Volume V1",
+    74: "Flow V1",
     80: "Current Power",
     86: "Temp1",
     87: "Temp2",
