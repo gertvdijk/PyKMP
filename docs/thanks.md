@@ -19,6 +19,11 @@ the possibilities integrating these MULTICAL® meters (as provided by Dutch util
 non-cloud smart home.
 [GoT: Kamstrup Multical 402 stadsverwarmingsmeter RPI3+IR-kop][got-multical402-topic]
 
+# Contributors
+
+[Jan Kundrát][jankundrát]
+
 [meterlogger-wiki-kmp]: https://github.com/nabovarme/MeterLogger/wiki/Kamstrup-Protocol
 [github-ronaldvdmeer-multical402]: https://github.com/ronaldvdmeer/multical402-4-domoticz
 [got-multical402-topic]: https://gathering.tweakers.net/forum/list_messages/1776625
+[jankundrát]: https://github.com/jktjkt

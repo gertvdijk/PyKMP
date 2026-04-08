@@ -19,7 +19,6 @@ import decimal
 import enum
 import logging
 import math
-from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, NewType, cast
 
 import attrs
@@ -28,7 +27,7 @@ import crc
 from . import constants
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Iterator
 
 logger = logging.getLogger(__name__)
 
@@ -135,6 +134,26 @@ class CrcChecksumInvalidError(BaseCodecError):
     """CRC checksum validation of the data link byte sequence did not pass."""
 
 
+class TruncatedStuffingError(BaseCodecError):
+    """Byte stuffing indicates one more byte at the end of the input."""
+
+    def __str__(self) -> str:  # noqa: D105
+        return "Byte stuffing indicates one more byte at the end of the input"
+
+
+@attrs.frozen(kw_only=True)
+class InvalidStuffingByteError(BaseCodecError):
+    """Byte stuffing encountered an unrecognized encoded byte."""
+
+    raw_byte: int
+
+    def __str__(self) -> str:  # noqa: D105
+        return (
+            "Byte stuffing encountered an unrecognized encoded byte "
+            f"{self.raw_byte:02X}"
+        )
+
+
 @attrs.frozen(kw_only=True)
 class ApplicationData:
     """Data class for the data in the application layer of the Kamstrup KMP protocol."""
@@ -178,21 +197,12 @@ class PhysicalCodec:
 
     direction: PhysicalDirection = attrs.field()
     _start_byte: int = attrs.field(init=False)  # depends on direction
-
-    BYTE_STUFFING_MAP: ClassVar[Mapping[bytes, bytes]] = MappingProxyType({
-        the_byte.to_bytes(1, "big"): (
-            constants.ByteCode.STUFFING.value.to_bytes(1, "big")
-            + (the_byte ^ 0xFF).to_bytes(1, "big")
-        )
-        for the_byte in (
-            # Order matters for having BYTE_STUFFING as the first; itself is used in
-            # the escaped sequence.
-            constants.ByteCode.STUFFING.value,
-            constants.ByteCode.ACK.value,
-            constants.ByteCode.START_FROM_METER.value,
-            constants.ByteCode.START_TO_METER.value,
-            constants.ByteCode.STOP.value,
-        )
+    _stuffable_bytes: ClassVar[frozenset[int]] = frozenset({
+        constants.ByteCode.ACK.value,
+        constants.ByteCode.START_FROM_METER.value,
+        constants.ByteCode.START_TO_METER.value,
+        constants.ByteCode.STOP.value,
+        constants.ByteCode.STUFFING.value,
     })
 
     def __attrs_post_init__(self) -> None:
@@ -207,6 +217,39 @@ class PhysicalCodec:
                 return constants.ByteCode.START_FROM_METER.value
             case PhysicalDirection.TO_METER:
                 return constants.ByteCode.START_TO_METER.value
+
+    @classmethod
+    def _iter_destuffed_bytes(cls, stuffed: bytes) -> Iterator[int]:
+        """Yield destuffed byte values from a stuffed byte sequence."""
+        in_stuffing = False
+
+        for raw_byte in stuffed:
+            if in_stuffing:
+                in_stuffing = False
+                if (xored := raw_byte ^ 0xFF) not in cls._stuffable_bytes:
+                    raise InvalidStuffingByteError(raw_byte=raw_byte)
+                yield xored
+                continue
+
+            if raw_byte == constants.ByteCode.STUFFING.value:
+                in_stuffing = True
+                continue
+
+            yield raw_byte
+
+        if in_stuffing:
+            raise TruncatedStuffingError
+
+    @classmethod
+    def _iter_stuffed_bytes(cls, raw: DataLinkBytes) -> Iterator[bytes]:
+        """Yield stuffed byte chunks from an unescaped byte sequence."""
+        for raw_byte in raw:
+            if raw_byte in cls._stuffable_bytes:
+                yield (
+                    (constants.ByteCode.STUFFING.value << 8) + (raw_byte ^ 0xFF)
+                ).to_bytes(2, "big")
+            else:
+                yield raw_byte.to_bytes(1, "big")
 
     def decode(self, frame: PhysicalBytes) -> DataLinkBytes:
         """
@@ -237,10 +280,7 @@ class PhysicalCodec:
             )
 
         data_bytes = frame[1:-1]
-        for unescaped_byte, escaped_bytes in self.BYTE_STUFFING_MAP.items():
-            data_bytes = data_bytes.replace(escaped_bytes, unescaped_byte)
-
-        return cast(DataLinkBytes, data_bytes)
+        return cast(DataLinkBytes, bytes(self._iter_destuffed_bytes(data_bytes)))
 
     def encode(self, data_bytes: DataLinkBytes) -> PhysicalBytes:
         """
@@ -255,13 +295,11 @@ class PhysicalCodec:
                 what="Data link bytes", actual=0, length_expected=None
             )
 
-        raw = cast(bytes, data_bytes)
-        for unescaped_byte, escaped_bytes in self.BYTE_STUFFING_MAP.items():
-            raw = raw.replace(unescaped_byte, escaped_bytes)
+        raw_stuffed = b"".join(self._iter_stuffed_bytes(data_bytes))
 
         frame = (
             self._start_byte.to_bytes(1, "big")
-            + raw
+            + raw_stuffed
             + constants.ByteCode.STOP.value.to_bytes(1, "big")
         )
         return cast(PhysicalBytes, frame)

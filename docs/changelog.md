@@ -9,6 +9,25 @@ SPDX-License-Identifier: CC0-1.0
 
 _In development._
 
+### Noteworthy changes
+
+- The physical byte-stuffing codec has been fixed to avoid recursive destuffing during
+  decode which could cause valid frames to be decoded incorrectly.
+
+    The implementation now uses a single-pass approach for both
+    [`decode()`][pykmp.codec.PhysicalCodec.decode] and
+    [`encode()`][pykmp.codec.PhysicalCodec.encode]. This removes a fragile
+    ordering dependency in encoding and
+    improves handling of truncated or otherwise unrecognized stuffing
+    sequences, with corresponding test coverage updates.
+
+    Introduces two new exceptions in the codec module:
+    [`TruncatedStuffingError`][pykmp.codec.TruncatedStuffingError] and
+    [`InvalidStuffingByteError`][pykmp.codec.InvalidStuffingByteError].
+
+    Thanks to [Jan Kundrát](https://github.com/jktjkt) for reporting the issue along
+    with a proposed fix ([PR #6](https://github.com/gertvdijk/PyKMP/pull/6)).
+
 ### Tooling changes
 
 - Project documentation has been migrated from [MkDocs](https://www.mkdocs.org/) with

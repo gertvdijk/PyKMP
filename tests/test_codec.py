@@ -24,10 +24,12 @@ from pykmp.codec import (
     DataLinkData,
     FloatCodec,
     InvalidDestinationAddressError,
+    InvalidStuffingByteError,
     OutOfRangeError,
     PhysicalBytes,
     PhysicalCodec,
     PhysicalDirection,
+    TruncatedStuffingError,
     UnsupportedDecimalExponentError,
 )
 
@@ -72,6 +74,17 @@ from . import util
             "80 1BE4 0D",
             "   1B     ",
             id="stuffing stuff byte",
+        ),
+        pytest.param(
+            PhysicalDirection.FROM_METER,
+            # Note that '1BE4' destuffs to '1B'. An implementation that would run
+            # multiple destuffing rounds would wrongly attempt to destuff '1B__' again.
+            # In this case where it is followed by '7F' ('1B7F') after initial
+            # destuffing, it would be wrongly destuffed in another round to '80' while
+            # it should not. See issue/PR gertvdijk/PyKMP#6.
+            "40 1BE47F 0D",
+            "   1B  7F   ",
+            id="stuffed stuff byte should not cause recursive destuffing",
         ),
     ],
 )
@@ -143,6 +156,20 @@ def test_codec_physical_decode_ack(
             DataLengthUnexpectedError,
             "Frame is of zero length.",
             id="empty",
+        ),
+        pytest.param(
+            PhysicalDirection.FROM_METER,
+            "40 3F 1BFF 0D",
+            InvalidStuffingByteError,
+            "Byte stuffing encountered an unrecognized encoded byte FF",
+            id="Unrecongized stuffing value",
+        ),
+        pytest.param(
+            PhysicalDirection.FROM_METER,
+            "40 3F 1B 0D",
+            TruncatedStuffingError,
+            "Byte stuffing indicates one more byte at the end of the input",
+            id="Truncated stuffing value",
         ),
     ],
 )
