@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from typing import Final  # pragma: no cover
 
 
-# Decimals of each variable in the GetRegister command request/response (CID=0x10)
+# Register display names as used with GetRegister command request/response (CID=0x10)
 REGISTERS: Final[Mapping[int, str]] = {
     0x003C: "Heat Energy (E1)",
     0x0044: "Volume",
