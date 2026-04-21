@@ -28,6 +28,26 @@ _In development._
     Thanks to [Jan Kundrát](https://github.com/jktjkt) for reporting the issue along
     with a proposed fix ([PR #6](https://github.com/gertvdijk/PyKMP/pull/6)).
 
+- The catalog of units and registers in [`pykmp.constants`][pykmp.constants] has been
+  expanded substantially:
+
+    - The [register display names][pykmp.constants.REGISTERS] catalog has been expanded
+      for an **additional 108 register IDs**. 90 of which were found on MULTICAL® 603
+      and MULTICAL® 303 meters and 18 on the 382 electricity meter.
+    - Eight new unit IDs have been added to the
+      [unit display names mapping][pykmp.constants.UNITS_NAMES].
+    - Several unit display names have been corrected and extended, including fixes for
+      Kelvin and for watt- and var-based units.
+    - A few register display names have been refined with clearer suffixes to denote the
+      'channel'.
+
+    Thanks to [Jan Kundrát](https://github.com/jktjkt) for contributing the extensive
+    list of the MULTICAL® heat meter additions along with a proposed change
+    ([PR #4](https://github.com/gertvdijk/PyKMP/pull/4)).
+
+    Thanks to [Benny Lyne Amorsen](https://github.com/amorsen) for listing the registers
+    on the electricity meter.
+
 ### Tooling changes
 
 - Project documentation has been migrated from [MkDocs](https://www.mkdocs.org/) with
@@ -37,6 +57,10 @@ _In development._
 
 ### Development changes
 
+- The [`constants`][pykmp.constants] module now uses decimal IDs for
+  [`REGISTERS`][pykmp.constants.REGISTERS] and
+  [`UNITS_NAMES`][pykmp.constants.UNITS_NAMES], matching the primary numbering used in
+  vendor documentation and the tool's default output more closely.
 - Pyright has been adopted as an additional strict type checker in `run-all-linters`,
   with configuration aligned more closely with the VS Code IDE experience.
 - Binary-heavy tests and related constants have been reformatted to use
