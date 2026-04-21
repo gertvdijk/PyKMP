@@ -16,6 +16,10 @@ if TYPE_CHECKING:
 
 # Register display names as used with GetRegister command request/response (CID=0x10)
 REGISTERS: Final[Mapping[int, str]] = {
+    1: "Energy in",
+    2: "Energy out",
+    13: "Energy in hires",
+    14: "Energy out hires",
     60: "Heat Energy (E1)",
     61: "Inlet Energy E4",
     62: "Outlet Energy E5",
@@ -145,7 +149,21 @@ REGISTERS: Final[Mapping[int, str]] = {
     1004: "HourCounter",
     1005: "Software edition",
     1010: "Customer number 1",  # 8 least-significant digits
+    1023: "Power in",
+    1024: "Power out",
     1032: "Operation Mode",
+    1054: "Voltage L1",
+    1055: "Voltage L2",
+    1056: "Voltage L3",
+    1076: "Current L1",
+    1077: "Current L2",
+    1078: "Current L3",
+    1080: "Power in L1",
+    1081: "Power in L2",
+    1082: "Power in L3",
+    1344: "Power out L1",
+    1345: "Power out L2",
+    1346: "Power out L3",
 }
 
 
