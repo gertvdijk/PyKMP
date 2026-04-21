@@ -35,8 +35,20 @@ from . import util
 
 
 @pytest.mark.parametrize(
-    ("direction", "frame", "expected"),
+    ("direction", "frame", "data_link"),
     [
+        pytest.param(
+            PhysicalDirection.TO_METER,
+            "80 04 1BF2 00 1BF9 0D",
+            "   04 0D   00 06     ",
+            id="Kamstrup doc 3.1 Physical layer example, plus start/stop byte",
+        ),
+        pytest.param(
+            PhysicalDirection.TO_METER,
+            "80 3F 01 058A 0D",
+            "   3F 01 058A   ",
+            id="Kamstrup doc 6.2.1 GetType request (no stuffing needed)",
+        ),
         pytest.param(
             PhysicalDirection.FROM_METER,
             "40 3F 02 01234567 E956 0D",
@@ -44,24 +56,40 @@ from . import util
             id="Kamstrup doc 6.2.2 GetSerialNo response (no destuffing needed)",
         ),
         pytest.param(
+            PhysicalDirection.TO_METER,
+            "80 3F 10 01 00 1B7F D408 0D",
+            "   3F 10 01 00 80   D408   ",
+            id="Kamstrup doc 6.2.4 GetRegister request (stuffing needed)",
+        ),
+        pytest.param(
             PhysicalDirection.FROM_METER,
             "40 3F 10 00 1B7F 16 04 11 012AF024 6303 0D",
             "   3F 10 00   80 16 04 11 012AF024 6303   ",
             id="Kamstrup doc 6.2.4 GetRegister response (destuffing needed)",
         ),
+        pytest.param(
+            PhysicalDirection.TO_METER,
+            "80 1BE4 0D",
+            "   1B     ",
+            id="stuffing stuff byte",
+        ),
     ],
 )
-def test_codec_physical_decode(
+def test_codec_physical_decode_encode(
     direction: PhysicalDirection,
     frame: str,
-    expected: str,
+    data_link: str,
     ensure_no_warnings_logged: util.SimpleContextTest,
 ) -> None:
     with ensure_no_warnings_logged():
-        returned = PhysicalCodec(direction=direction).decode(
+        decoded = PhysicalCodec(direction=direction).decode(
             PhysicalBytes(bytes.fromhex(frame))
         )
-    assert returned.hex() == bytes.fromhex(expected).hex()
+        encoded = PhysicalCodec(direction=direction).encode(
+            DataLinkBytes(bytes.fromhex(data_link))
+        )
+    assert decoded.hex() == bytes.fromhex(data_link).hex()
+    assert encoded.hex() == bytes.fromhex(frame).hex()
 
 
 @pytest.mark.parametrize(
@@ -127,54 +155,6 @@ def test_codec_physical_decode_error(
     codec = PhysicalCodec(direction=direction)
     with pytest.raises(exc_type, match=util.full_match_re(exc_message)):
         codec.decode(PhysicalBytes(bytes.fromhex(frame)))
-
-
-@pytest.mark.parametrize(
-    ("direction", "to_encode", "expected"),
-    [
-        pytest.param(
-            PhysicalDirection.TO_METER,
-            "   04 0D   00 06     ",
-            "80 04 1BF2 00 1BF9 0D",
-            id="Kamstrup doc 3.1 Physical layer example, plus start/stop byte",
-        ),
-        pytest.param(
-            PhysicalDirection.TO_METER,
-            "   3F 01 058A   ",
-            "80 3F 01 058A 0D",
-            id="Kamstrup doc 6.2.1 GetType request (no stuffing needed)",
-        ),
-        pytest.param(
-            PhysicalDirection.TO_METER,
-            "   3F 10 01 00 80   D408   ",
-            "80 3F 10 01 00 1B7F D408 0D",
-            id="Kamstrup doc 6.2.4 GetRegister request (stuffing needed)",
-        ),
-        pytest.param(
-            PhysicalDirection.TO_METER,
-            "   1B     ",
-            "80 1BE4 0D",
-            id="stuffing character stuffed",
-        ),
-        pytest.param(
-            PhysicalDirection.FROM_METER,
-            "   3F   ",
-            "40 3F 0D",
-            id="encode as meter (direction=FROM_METER) has different start byte",
-        ),
-    ],
-)
-def test_codec_physical_encode(
-    direction: PhysicalDirection,
-    to_encode: str,
-    expected: str,
-    ensure_no_warnings_logged: util.SimpleContextTest,
-) -> None:
-    with ensure_no_warnings_logged():
-        codec = PhysicalCodec(direction=direction)
-        assert codec.encode(DataLinkBytes(bytes.fromhex(to_encode))).hex() == (
-            bytes.fromhex(expected).hex()
-        )
 
 
 @pytest.mark.parametrize(

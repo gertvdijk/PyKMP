@@ -22,6 +22,10 @@ _In development._
   with configuration aligned more closely with the VS Code IDE experience.
 - Binary-heavy tests and related constants have been reformatted to use
   `bytes.fromhex()`, improving the readability of byte-oriented inputs and outputs.
+- The physical codec happy-path tests now combine
+  [`decode()`][pykmp.codec.PhysicalCodec.decode] and
+  [`encode()`][pykmp.codec.PhysicalCodec.encode] round-trip examples into a single
+  parametrized test, reducing duplication and keeping the example cases symmetrical.
 - Minor follow-up changes further modernized the developer tooling after `0.0.2`.
   These under-the-hood updates included refreshing the VS Code workspace for the
   `uv`-managed environment, refining Pyright-specific suppressions, correcting a small
