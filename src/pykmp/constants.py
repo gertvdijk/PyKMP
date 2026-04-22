@@ -98,12 +98,40 @@ REGISTERS: Final[Mapping[int, str]] = {
     234: "l/imp for VA",
     235: "l/imp for VB",
     239: "Volume V1 hires",
+    241: "MaxFlow_D",
+    242: "MinFlow_D",
+    243: "Reverse flow V1",
+    254: "Type no",
+    257: "Pulse value V1",
+    258: "Pulse value V2",
+    268: "Q\N{LATIN SUBSCRIPT SMALL LETTER P} averaging time",
     # Undocumented (259 and 260), but it matches the info given by Multical 603 in the
     # diagnostics display
     259: "Nominal Q\N{LATIN SUBSCRIPT SMALL LETTER P} V1",
     260: "Nominal Q\N{LATIN SUBSCRIPT SMALL LETTER P} V2",
     266: "E1HighRes",
     267: "Cooling energy E3 hires",
+    279: "DIN meter ID",
+    292: "Water temperature",
+    # TODO(jkt): Uncertain order (293-295), revisit May 2026 when a first "valid" log
+    # entry is expected
+    293: "Min water temperature monthly",
+    294: "Max water temperature monthly",
+    295: "Avg water temperature monthly",
+    296: "Min water temperature daily",
+    297: "Max water temperature daily",
+    298: "Avg water temperature daily",
+    299: "Meter temperature",
+    300: "Min meter temperature monthly",
+    301: "Max meter temperature monthly",
+    302: "Avg meter temperature monthly",
+    303: "Min meter temperature daily",
+    304: "Max meter temperature daily",
+    305: "Avg meter temperature daily",
+    # Documentation for 327-330 doesn't match what a KWM2231 water meter is sending
+    327: "Target date 1",
+    328: "Target date 2",
+    338: "Data quality",
     346: "Module SW rev",
     347: "Customer number",
     348: "Date and Time",  # TODO: unknown unit 79, 28591984415535
@@ -129,10 +157,26 @@ REGISTERS: Final[Mapping[int, str]] = {
     388: "Flow V1 min month date",
     389: "Power max month date",
     390: "Power min month time",
+    394: "Config XYZ",
     398: "T1 actual (one decimal)",
     399: "T2 actual (one decimal)",
     400: "T1-T2 (one decimal)",
     404: "Meter Type",
+    # 409: a combination of a bitfield and some duration tracking. Example values:
+    # - 17184063489:
+    #   dry 1-8 hrs, meter temperature too high: 9-24 hrs, no consumption: 9-24 hrs
+    # - 17181966337:
+    #   dry 1-8 hrs, meter temperature too high: 1-8 hrs, no consumption: 9-24 hrs
+    # - 17179869185:
+    #   dry 1-8 hrs, no consumption: 9-24 hrs
+    # - 8589934593:
+    #   dry 1-8 hrs, no consumption: 1-8 hrs
+    409: "Info hour counter",
+    440: "MaxFlow_H",
+    445: "MaxFlowDate_D",
+    446: "MinFlowDate_D",
+    # Seen in the logger. E.g. 128 is "meter temperature too high"
+    458: "Info code",
     473: "Energy E10",
     474: "Energy E11",
     477: "T3 time average day",
@@ -141,8 +185,41 @@ REGISTERS: Final[Mapping[int, str]] = {
     506: "P2 average day",
     507: "P1 average hour",
     508: "P2 average hour",
+    # Undocumented; observed on a fresh KWM2231 water meter from 2026
+    582: "Battery remaining",
+    583: "Acoustic noise last day",
+    622: "V1 extra digit",
+    # Undocumented, e.g., KWM2231
+    640: "Meter type text",
     # Undocumented, but it matches the actual interval on Multical 303
     675: "wM-Bus transmission interval",
+    # Undocumented (692-721), but it looks like a histogram readout
+    692: "Volume in flow bucket 1",
+    697: "Volume in flow bucket 2",
+    698: "Volume in flow bucket 3",
+    699: "Volume in flow bucket 4",
+    700: "Volume in flow bucket 5",
+    701: "Volume in flow bucket 6",
+    702: "Volume in flow bucket 7",
+    703: "Volume in flow bucket 8",
+    704: "Volume in flow bucket 9",
+    705: "Volume in flow bucket 10",
+    706: "Volume in flow bucket 11",
+    707: "Volume in flow bucket 12",
+    708: "Volume in flow bucket 13",
+    709: "Flow bucket 1",
+    710: "Flow bucket 2",
+    711: "Flow bucket 3",
+    712: "Flow bucket 4",
+    713: "Flow bucket 5",
+    714: "Flow bucket 6",
+    715: "Flow bucket 7",
+    716: "Flow bucket 8",
+    717: "Flow bucket 9",
+    718: "Flow bucket 10",
+    719: "Flow bucket 11",
+    720: "Flow bucket 12",
+    721: "Flow bucket 13",
     1001: "Fabrication No",
     1002: "Time",
     1003: "Date",
