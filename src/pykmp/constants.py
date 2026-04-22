@@ -122,13 +122,13 @@ REGISTERS: Final[Mapping[int, str]] = {
     381: "T1 time average hour",
     382: "T2 time average hour",
     383: "Flow V1 max year date",
-    # 384: something similar as 383?
+    384: "Flow V1 min year date",
     385: "Power max year date",
-    # 386: something similar as 385?
+    386: "Power min year date",
     387: "Flow V1 max month date",
-    # 388: something similar as 387?
+    388: "Flow V1 min month date",
     389: "Power max month date",
-    # 390: something similar as 389?
+    390: "Power min month time",
     398: "T1 actual (one decimal)",
     399: "T2 actual (one decimal)",
     400: "T1-T2 (one decimal)",  # Undocumented, but appears as such on Multical 603
