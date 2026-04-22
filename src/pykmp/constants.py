@@ -131,7 +131,7 @@ REGISTERS: Final[Mapping[int, str]] = {
     390: "Power min month time",
     398: "T1 actual (one decimal)",
     399: "T2 actual (one decimal)",
-    400: "T1-T2 (one decimal)",  # Undocumented, but appears as such on Multical 603
+    400: "T1-T2 (one decimal)",
     404: "Meter Type",
     473: "Energy E10",
     474: "Energy E11",
