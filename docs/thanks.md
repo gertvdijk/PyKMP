@@ -23,6 +23,8 @@ non-cloud smart home.
 
 [Jan Kundrát][jankundrát]
 
+[Benny Lyne Amorsen](https://github.com/amorsen)
+
 [meterlogger-wiki-kmp]: https://github.com/nabovarme/MeterLogger/wiki/Kamstrup-Protocol
 [github-ronaldvdmeer-multical402]: https://github.com/ronaldvdmeer/multical402-4-domoticz
 [got-multical402-topic]: https://gathering.tweakers.net/forum/list_messages/1776625
