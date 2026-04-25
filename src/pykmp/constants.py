@@ -106,7 +106,7 @@ REGISTERS: Final[Mapping[int, str]] = {
     267: "Cooling energy E3 hires",
     346: "Module SW rev",
     347: "Customer number",
-    348: "Date and Time",  # TODO: unknown unit 79, 28591984415535
+    348: "Date and Time",
     355: "COP Year",
     362: "Tariff TA4",
     364: "Heat energy A1",  # Heat energy with discount A1, t2 < t5 limit
@@ -235,6 +235,7 @@ UNITS_NAMES: Final[Mapping[int, str]] = {
     64: "Datetime",
     65: "imp/l",
     66: "l/imp",
+    79: "DST YY-MM-DD hh:mm:ss",
     85: "%RH",
     86: "%O\N{SUBSCRIPT TWO}",
     87: "m/s",

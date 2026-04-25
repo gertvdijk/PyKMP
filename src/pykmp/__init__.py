@@ -19,6 +19,7 @@ from .messages import (
     RegisterData,
     RegisterID,
 )
+from .registers import RegisterOutput
 
 # `PySerialClientCommunicator` is intentionally not re-exported from the package root.
 # Doing so would make the optional `pyserial` dependency an unconditional import-time
