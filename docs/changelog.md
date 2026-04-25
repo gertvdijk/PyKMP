@@ -29,11 +29,11 @@ _In development._
     with a proposed fix ([PR #6](https://github.com/gertvdijk/PyKMP/pull/6)).
 
 - The catalog of units and registers in [`pykmp.constants`][pykmp.constants] has been
-  expanded substantially:
+  expanded substantially with help from external contributors:
 
     - The [register display names][pykmp.constants.REGISTERS] catalog has been expanded
-      for an **additional 108 register IDs**. 90 of which were found on MULTICAL® 603
-      and MULTICAL® 303 meters and 18 on the 382 electricity meter.
+      by **173 register IDs**: 94 observed on MULTICAL® 603 and MULTICAL® 303 meters, 61
+      on a KWM2231 water meter, and 18 on the 382 electricity meter.
     - Eight new unit IDs have been added to the
       [unit display names mapping][pykmp.constants.UNITS_NAMES].
     - Several unit display names have been corrected and extended, including fixes for
@@ -41,9 +41,10 @@ _In development._
     - A few register display names have been refined with clearer suffixes to denote the
       'channel'.
 
-    Thanks to [Jan Kundrát](https://github.com/jktjkt) for contributing the extensive
-    list of the MULTICAL® heat meter additions along with a proposed change
-    ([PR #4](https://github.com/gertvdijk/PyKMP/pull/4)).
+    Thanks to [Jan Kundrát](https://github.com/jktjkt) for contributing extensive
+    register additions for MULTICAL® heat meters and the KWM2231 water meter via
+    [PR #4](https://github.com/gertvdijk/PyKMP/pull/4) and
+    [PR #11](https://github.com/gertvdijk/PyKMP/pull/11).
 
     Thanks to [Benny Lyne Amorsen](https://github.com/amorsen) for listing the registers
     on the electricity meter.
