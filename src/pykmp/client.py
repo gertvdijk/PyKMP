@@ -63,6 +63,18 @@ class EncodedClientResponse(Generic[CCReq_t_co]):
 DESTINATION_ADDRESS_DEFAULT = constants.DestinationAddress.HEAT_METER.value
 
 
+@attrs.define(kw_only=True)
+class UnknownCidError(codec.BaseCodecError):
+    """Encountered a command with an unknown command ID"""
+
+    cid: int
+    raw_data: bytes
+
+    def __str__(self) -> str:  # noqa: D105
+        pretty_data = f"with data {self.raw_data.hex(' ')}" if len(self.raw_data) else "(no data)"
+        return f"Unrecognized CID {self.cid:#02x} {pretty_data}"
+
+
 @attrs.define(kw_only=True, auto_attribs=False)
 class ClientCodec:
     """Wires up the codecs of all layers for communication *to the meter*."""
@@ -109,6 +121,41 @@ class ClientCodec:
             data_link_data.application_bytes
         )
         return frame.request_cls.get_response_type().decode(application_data)
+
+    def decode_command(self, physical_bytes: codec.PhysicalBytes):
+        data_link_bytes = self.physical_codec_encode.decode(physical_bytes)
+        data_link_data = self.data_link_codec.decode(data_link_bytes)
+        application_data = self.application_codec.decode(
+            data_link_data.application_bytes
+        )
+        matching_commands = [c for c in messages.BaseRequest.__subclasses__()
+                             if getattr(c, 'command_id', None) is not None
+                             and c.command_id == application_data.command_id]
+        assert len(matching_commands) <= 1
+        if len(matching_commands):
+            return matching_commands[0].decode(application_data)
+        else:
+            raise UnknownCidError(cid=application_data.command_id, raw_data=application_data.data)
+
+    def decode_response(self, physical_bytes: codec.PhysicalBytes):
+        try:
+            data_link_bytes = self.physical_codec_decode.decode(physical_bytes)
+        except codec.AckReceivedException as exc:
+            raise NotImplementedError from exc
+
+        data_link_data = self.data_link_codec.decode(data_link_bytes)
+        application_data = self.application_codec.decode(
+            data_link_data.application_bytes
+        )
+
+        matching_responses = [r for r in messages.BaseResponse.__subclasses__()
+                              if getattr(r, 'command_id', None) is not None
+                              and r.command_id == application_data.command_id]
+        assert len(matching_responses) <= 1
+        if len(matching_responses):
+            return matching_responses[0].decode(application_data)
+        else:
+            raise UnknownCidError(cid=application_data.command_id, raw_data=application_data.data)
 
 
 class ClientCommunicator(Protocol):
