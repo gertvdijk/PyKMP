@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2024 The PyKMP contributors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+[Unit]
+Description=Publish Kamstrup meter data to Home Assistant MQTT via PyKMP
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Set to the user that owns the virtualenv/repo (root will be used if left commented)
+#User=pykmp
+#Group=pykmp
+EnvironmentFile=/etc/pykmp-ha.env
+WorkingDirectory=/opt/PyKMP
+ExecStart=/usr/bin/env python3 /opt/PyKMP/examples/home_assistant_mqtt.py
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
