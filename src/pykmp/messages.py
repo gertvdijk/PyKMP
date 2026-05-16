@@ -107,7 +107,7 @@ class BaseRequest(HasCommandIdAndName, Protocol[Res_t_co]):
     @classmethod
     def get_response_type(cls) -> type[Res_t_co]:
         """Return the response class (type) matching this request class."""
-        return cls.response_type  # pyright: ignore[reportGeneralTypeIssues]
+        return cls.response_type
 
 
 class BaseResponse(HasCommandIdAndName, Protocol[Req_t_co]):
@@ -122,7 +122,7 @@ class BaseResponse(HasCommandIdAndName, Protocol[Req_t_co]):
     @classmethod
     def get_request_type(cls) -> type[Req_t_co]:
         """Return the request class (type) matching this response class."""
-        return cls.request_type  # pyright: ignore[reportGeneralTypeIssues]
+        return cls.request_type
 
 
 class SupportsDecode(Protocol):
@@ -210,7 +210,7 @@ class GetTypeResponse(
         rf"^(?P<letter>[A-Z])(?P<number>{ZERO_TO_255_RE.pattern})$",
         re.VERBOSE,
     )
-    SOFTWARE_REVISION_UNAVAILABLE_BYTES: ClassVar[bytes] = b"\x00\x00"
+    SOFTWARE_REVISION_UNAVAILABLE_BYTES: ClassVar[bytes] = bytes.fromhex("0000")
 
     @classmethod
     def decode(cls, data: codec.ApplicationData) -> Self:
@@ -335,7 +335,7 @@ class GetSerialResponse(
     SERIAL_LENGTH_ENCODED: ClassVar[int] = 4
     SERIAL_VALUE_MAX: ClassVar[int] = (2 ** (SERIAL_LENGTH_ENCODED * 8)) - 1
 
-    @serial.validator  # pyright: ignore[reportUnknownMemberType, reportUntypedFunctionDecorator, reportGeneralTypeIssues]
+    @serial.validator  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType, reportUntypedFunctionDecorator]
     def digits_only_validator(self, _: attrs.Attribute[Self], value: str) -> None:
         """Validate all characters in string of serial number are digits."""
         try:
@@ -426,7 +426,7 @@ class GetRegisterRequest(
     REGISTER_ID_LENGTH_ENCODED: ClassVar[int] = 2
     REGISTER_ID_VALUE_MAX: ClassVar[int] = (2 ** (REGISTER_ID_LENGTH_ENCODED * 8)) - 1
 
-    @registers.validator  # pyright: ignore[reportUnknownMemberType, reportUntypedFunctionDecorator, reportGeneralTypeIssues]
+    @registers.validator  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType, reportUntypedFunctionDecorator]
     def register_id_validator(
         self, _: attrs.Attribute[Self], value: Collection[RegisterID]
     ) -> None:
@@ -542,7 +542,7 @@ class GetRegisterResponse(
     command_id: ClassVar[int] = GetRegisterRequest.command_id
     command_name: ClassVar[str] = GetRegisterRequest.command_name
 
-    registers: Mapping[RegisterID, RegisterData] = attrs.field(factory=dict)
+    registers: Mapping[RegisterID, RegisterData] = attrs.field(factory=dict)  # pyright: ignore[reportUnknownVariableType]
 
     REGISTER_ID_LENGTH_ENCODED: ClassVar[int] = 2
     REGISTER_UNIT_LENGTH_ENCODED: ClassVar[int] = 1

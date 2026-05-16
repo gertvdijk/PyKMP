@@ -37,6 +37,7 @@ SPDX-License-Identifier: CC0-1.0
 ::: pykmp.messages.SupportsDecode
 ::: pykmp.messages.SupportsEncode
 ::: pykmp.messages.WithDataMixin
+::: pykmp.messages.WithoutDataMixin
 
 ## Exceptions
 

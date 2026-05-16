@@ -30,7 +30,7 @@ A connection can be made from any other host using the
 $ pykmp-tool {==--serial-device socket://hostname:2002==} [...]
 ```
 
-Or use the environment variable to not having to specify it in every command:
+Or use the environment variable to avoid specifying it in every command:
 
 ```console
 $ export PYKMP_SERIAL_DEVICE=socket://hostname:2002

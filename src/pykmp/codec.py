@@ -19,12 +19,15 @@ import decimal
 import enum
 import logging
 import math
-from typing import Any, Final, Literal, NewType, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, NewType, cast
 
 import attrs
 import crc
 
 from . import constants
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 logger = logging.getLogger(__name__)
 
@@ -71,11 +74,6 @@ class OutOfRangeError(BaseCodecError):
                 return f"{self.what} is over maximum of {upper}: {self.actual}."
             case (int(lower), None):
                 return f"{self.what} is under minimum of {lower}: {self.actual}."
-            # Instead of a 'type: ignore[return]', help mypy with an unreachable default
-            # case. Looks like https://github.com/python/mypy/issues/12364.
-            # Pyright is right here, so suppress that one.
-            case _:  # pyright: ignore[reportUnnecessaryComparison]  # pragma: nocover
-                raise TypeError  # pragma: nocover
 
 
 @attrs.define(kw_only=True)
@@ -136,6 +134,26 @@ class CrcChecksumInvalidError(BaseCodecError):
     """CRC checksum validation of the data link byte sequence did not pass."""
 
 
+class TruncatedStuffingError(BaseCodecError):
+    """Byte stuffing indicates one more byte at the end of the input."""
+
+    def __str__(self) -> str:  # noqa: D105
+        return "Byte stuffing indicates one more byte at the end of the input"
+
+
+@attrs.frozen(kw_only=True)
+class InvalidStuffingByteError(BaseCodecError):
+    """Byte stuffing encountered an unrecognized encoded byte."""
+
+    raw_byte: int
+
+    def __str__(self) -> str:  # noqa: D105
+        return (
+            "Byte stuffing encountered an unrecognized encoded byte "
+            f"{self.raw_byte:02X}"
+        )
+
+
 @attrs.frozen(kw_only=True)
 class ApplicationData:
     """Data class for the data in the application layer of the Kamstrup KMP protocol."""
@@ -179,22 +197,13 @@ class PhysicalCodec:
 
     direction: PhysicalDirection = attrs.field()
     _start_byte: int = attrs.field(init=False)  # depends on direction
-
-    BYTE_STUFFING_MAP: Final[dict[bytes, bytes]] = {
-        the_byte.to_bytes(1, "big"): (
-            constants.ByteCode.STUFFING.value.to_bytes(1, "big")
-            + (the_byte ^ 0xFF).to_bytes(1, "big")
-        )
-        for the_byte in (
-            # Order matters for having BYTE_STUFFING as the first; itself is used in the
-            # escaped sequence.
-            constants.ByteCode.STUFFING.value,
-            constants.ByteCode.ACK.value,
-            constants.ByteCode.START_FROM_METER.value,
-            constants.ByteCode.START_TO_METER.value,
-            constants.ByteCode.STOP.value,
-        )
-    }
+    _stuffable_bytes: ClassVar[frozenset[int]] = frozenset({
+        constants.ByteCode.ACK.value,
+        constants.ByteCode.START_FROM_METER.value,
+        constants.ByteCode.START_TO_METER.value,
+        constants.ByteCode.STOP.value,
+        constants.ByteCode.STUFFING.value,
+    })
 
     def __attrs_post_init__(self) -> None:
         """Select start byte value according to configuration (direction)."""
@@ -209,6 +218,39 @@ class PhysicalCodec:
             case PhysicalDirection.TO_METER:
                 return constants.ByteCode.START_TO_METER.value
 
+    @classmethod
+    def _iter_destuffed_bytes(cls, stuffed: bytes) -> Iterator[int]:
+        """Yield destuffed byte values from a stuffed byte sequence."""
+        in_stuffing = False
+
+        for raw_byte in stuffed:
+            if in_stuffing:
+                in_stuffing = False
+                if (xored := raw_byte ^ 0xFF) not in cls._stuffable_bytes:
+                    raise InvalidStuffingByteError(raw_byte=raw_byte)
+                yield xored
+                continue
+
+            if raw_byte == constants.ByteCode.STUFFING.value:
+                in_stuffing = True
+                continue
+
+            yield raw_byte
+
+        if in_stuffing:
+            raise TruncatedStuffingError
+
+    @classmethod
+    def _iter_stuffed_bytes(cls, raw: DataLinkBytes) -> Iterator[bytes]:
+        """Yield stuffed byte chunks from an unescaped byte sequence."""
+        for raw_byte in raw:
+            if raw_byte in cls._stuffable_bytes:
+                yield (
+                    (constants.ByteCode.STUFFING.value << 8) + (raw_byte ^ 0xFF)
+                ).to_bytes(2, "big")
+            else:
+                yield raw_byte.to_bytes(1, "big")
+
     def decode(self, frame: PhysicalBytes) -> DataLinkBytes:
         """
         Decode a byte sequence of the physical layer into 'DataLinkBytes'.
@@ -222,7 +264,7 @@ class PhysicalCodec:
             )
 
         if frame == constants.ACK_BYTES:
-            # The ACK is an APL level acknowledge, but send as a single byte without
+            # The ACK is an APL level acknowledge, but sent as a single byte without
             # start, CRC or stop bytes. See also example Kamstrup doc 6.2.3 (SetClock).
             raise AckReceivedException
 
@@ -238,10 +280,7 @@ class PhysicalCodec:
             )
 
         data_bytes = frame[1:-1]
-        for unescaped_byte, escaped_bytes in self.BYTE_STUFFING_MAP.items():
-            data_bytes = data_bytes.replace(escaped_bytes, unescaped_byte)
-
-        return cast(DataLinkBytes, data_bytes)
+        return cast(DataLinkBytes, bytes(self._iter_destuffed_bytes(data_bytes)))
 
     def encode(self, data_bytes: DataLinkBytes) -> PhysicalBytes:
         """
@@ -256,13 +295,11 @@ class PhysicalCodec:
                 what="Data link bytes", actual=0, length_expected=None
             )
 
-        raw = cast(bytes, data_bytes)
-        for unescaped_byte, escaped_bytes in self.BYTE_STUFFING_MAP.items():
-            raw = raw.replace(unescaped_byte, escaped_bytes)
+        raw_stuffed = b"".join(self._iter_stuffed_bytes(data_bytes))
 
         frame = (
             self._start_byte.to_bytes(1, "big")
-            + raw
+            + raw_stuffed
             + constants.ByteCode.STOP.value.to_bytes(1, "big")
         )
         return cast(PhysicalBytes, frame)
@@ -272,7 +309,7 @@ class PhysicalCodec:
         """
         Encode an ACK message.
 
-        This type of message does not need andy stuffing or start/stop bytes.
+        This type of message does not need any stuffing or start/stop bytes.
         """
         return cast(PhysicalBytes, constants.ACK_BYTES)
 
@@ -390,7 +427,7 @@ class ApplicationCodec:
     sequences. What it does is destructuring the byte sequence into a Command ID (CID)
     and the command data.
 
-    Note that this covers both requests and responses and command data may be emtpy.
+    Note that this covers both requests and responses and command data may be empty.
 
     See section 3.3 of the KMP protocol description document.
     """
@@ -510,9 +547,9 @@ class FloatCodec:
     @classmethod
     def decode(cls, data: bytes) -> decimal.Decimal:
         """Decode a byte sequence of a floating point format to a decimal.Decimal."""
-        negative, exponent_negative, _exponent, mantissa = cls._decode_parts(data)
+        negative, exponent_negative, exponent_, mantissa = cls._decode_parts(data)
         mantissa_digits = tuple(int(digit) for digit in str(mantissa))
-        exponent = -_exponent if exponent_negative else _exponent
+        exponent = -exponent_ if exponent_negative else exponent_
         # Leverage the convenient three-item tuple constructor here.
         ret = decimal.Decimal((negative, mantissa_digits, exponent))
         logger.debug(
@@ -522,7 +559,7 @@ class FloatCodec:
             mantissa,
             negative,
             exponent_negative,
-            _exponent,
+            exponent_,
         )
         return ret
 
@@ -543,14 +580,14 @@ class FloatCodec:
         Its use is discouraged and if one needs a float then convert the returned
         decimal.Decimal from the regular `decode()` method.
         """
-        negative, exponent_negative, _exponent, mantissa = cls._decode_parts(data)
+        negative, exponent_negative, exponent, mantissa = cls._decode_parts(data)
         ret: int | float
         if not exponent_negative:
             # Final value remains integer; avoids unnecessary float imprecision for
             # cases without shifting the decimal point left.
-            ret = mantissa * int(math.pow(10, _exponent))
+            ret = mantissa * int(math.pow(10, exponent))
         else:
-            ret = mantissa * math.pow(10, -_exponent)
+            ret = mantissa * math.pow(10, -exponent)
         logger.debug(
             "Decoded floating point data: %f [data=%r, man=%d, si=%s, se=%s, exp=%d]",
             ret,
@@ -558,25 +595,40 @@ class FloatCodec:
             mantissa,
             negative,
             exponent_negative,
-            _exponent,
+            exponent,
         )
         return -ret if negative else ret
+
+    @staticmethod
+    def _decimal_parts(to_encode: decimal.Decimal) -> tuple[bool, tuple[int, ...], int]:
+        """Normalize a decimal and return its sign, digits tuple, and exponent."""
+        decimal_tuple = to_encode.normalize().as_tuple()
+        negative = bool(decimal_tuple.sign)
+        exponent = decimal_tuple.exponent
+        if not isinstance(exponent, int):
+            raise UnsupportedDecimalExponentError(actual_exponent=exponent)
+        return negative, decimal_tuple.digits, exponent
+
+    @staticmethod
+    def _encode_sign_exponent_byte(*, negative: bool, exponent: int) -> bytes:
+        """Pack sign and exponent metadata into the KMP sign/exponent byte."""
+        exponent_ = abs(exponent)
+        max_value_six_bits = 0b00111111
+        if exponent_ > max_value_six_bits:
+            raise OutOfRangeError(
+                what=f"Exponent ({exponent_}) to encode",
+                valid_range=(None, max_value_six_bits),
+                actual=exponent_,
+            )
+        sign_exp_value = (int(negative) << 7) | (int(exponent < 0) << 6) | exponent_
+        return sign_exp_value.to_bytes(1, "big")
 
     @classmethod
     def encode(
         cls, *, to_encode: decimal.Decimal, significand_num_bytes: int | None = 4
     ) -> bytes:
         """Encode a decimal.Decimal value to a byte sequence in the KMP protocol."""
-        decimal_tuple = to_encode.normalize().as_tuple()
-        negative, digits, exponent = (
-            bool(decimal_tuple.sign),
-            decimal_tuple.digits,
-            decimal_tuple.exponent,
-        )
-
-        if not isinstance(exponent, int):
-            raise UnsupportedDecimalExponentError(actual_exponent=exponent)
-
+        negative, digits, exponent = cls._decimal_parts(to_encode)
         mantissa = int("".join(str(digit) for digit in digits))
         mantissa_bytes_length_needed = math.ceil(mantissa.bit_length() / 8)
         if significand_num_bytes is not None:
@@ -589,21 +641,9 @@ class FloatCodec:
             mantissa_bytes_length = significand_num_bytes
         else:
             mantissa_bytes_length = mantissa_bytes_length_needed
-        exponent_negative = exponent < 0
-        _exponent: int = abs(exponent)
-        max_value_six_bits = 0b00111111
-        if _exponent > max_value_six_bits:
-            raise OutOfRangeError(
-                what=f"Exponent ({_exponent}) to encode",
-                valid_range=(None, max_value_six_bits),
-                actual=_exponent,
-            )
-        mantissa_lengh_byte = mantissa_bytes_length.to_bytes(1, "big")
-        sign_bit = int(negative) << 7
-        exponent_sign_bit = int(exponent_negative) << 6
-        exponent_bits = _exponent & 0b00111111
-        sign_exp_byte = (sign_bit | exponent_sign_bit | exponent_bits).to_bytes(
-            1, "big"
+        mantissa_length_byte = mantissa_bytes_length.to_bytes(1, "big")
+        sign_exp_byte = cls._encode_sign_exponent_byte(
+            negative=negative, exponent=exponent
         )
         mantissa_bytes = mantissa.to_bytes(mantissa_bytes_length, "big")
-        return mantissa_lengh_byte + sign_exp_byte + mantissa_bytes
+        return mantissa_length_byte + sign_exp_byte + mantissa_bytes

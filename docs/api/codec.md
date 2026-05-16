@@ -38,3 +38,5 @@ SPDX-License-Identifier: CC0-1.0
 ::: pykmp.codec.InvalidDestinationAddressError
 ::: pykmp.codec.UnsupportedDecimalExponentError
 ::: pykmp.codec.CrcChecksumInvalidError
+::: pykmp.codec.InvalidStuffingByteError
+::: pykmp.codec.TruncatedStuffingError

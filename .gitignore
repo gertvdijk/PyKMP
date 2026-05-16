@@ -7,8 +7,8 @@ __pycache__/
 /.pytest_cache
 /build
 /dist
-/.direnv
+/.venv
 /.coverage
 /.pytest-cov
 /site/
-.envrc
+uv.lock

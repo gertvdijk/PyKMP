@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from .util import SimpleContextTest
 
 
-@pytest.fixture()
+@pytest.fixture
 def ensure_no_warnings_logged(caplog: pytest.LogCaptureFixture) -> SimpleContextTest:
     """When exiting the context, assert no warning log records have been created."""
 

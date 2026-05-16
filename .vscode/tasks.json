@@ -4,7 +4,7 @@
     {
       "label": "run-all-linters-whole-project",
       "type": "shell",
-      "command": "PYTHON_INTERPRETER=\"${command:python.interpreterPath}\" ./run-all-linters",
+      "command": "uv run ./run-all-linters",
       "icon": {
         "id": "checklist",
         "color": "terminal.ansiGreen"

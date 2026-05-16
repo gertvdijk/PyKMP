@@ -116,47 +116,48 @@ def test_messages_get_type_request_decode_error(
     ("app_bytes", "expected_meter_bytes", "expected_sw_rev"),
     [
         pytest.param(
-            codec.ApplicationDataBytes(b"\x00\x04\x06\x01"),
-            b"\x00\x04",
+            "0004 0601",
+            "0004",
             "F1",
             id="Kamstrup doc 6.2.1 GetType response",
         ),
         pytest.param(
-            codec.ApplicationDataBytes(b"\x00\x04\x01\x00"),
-            b"\x00\x04",
+            "0004 0100",
+            "0004",
             "A0",
             id="software revision min",
         ),
         pytest.param(
-            codec.ApplicationDataBytes(b"\x00\x04\x1a\xFF"),
-            b"\x00\x04",
+            "0004 1AFF",
+            "0004",
             "Z255",
             id="software revision max",
         ),
         pytest.param(
-            codec.ApplicationDataBytes(b"\x00\x04\x00\x00"),
-            b"\x00\x04",
+            "0004 0000",
+            "0004",
             None,
             id="software revision unavailable",
         ),
     ],
 )
 def test_messages_get_type_response(
-    app_bytes: codec.ApplicationDataBytes,
-    expected_meter_bytes: bytes,
+    app_bytes: str,
+    expected_meter_bytes: str,
     expected_sw_rev: str | None,
     ensure_no_warnings_logged: util.SimpleContextTest,
 ) -> None:
+    app_bytes_raw = bytes.fromhex(app_bytes)
     with ensure_no_warnings_logged():
         data = codec.ApplicationData(
             command_id=constants.CommandId.GET_TYPE.value,
-            data=app_bytes,
+            data=codec.ApplicationDataBytes(app_bytes_raw),
         )
         response = GetTypeResponse.decode(data=data)
         assert response == GetTypeResponse(
-            meter_type_bytes=expected_meter_bytes,
+            meter_type_bytes=bytes.fromhex(expected_meter_bytes),
             software_revision=expected_sw_rev,
-            data_raw=app_bytes,
+            data_raw=codec.ApplicationDataBytes(app_bytes_raw),
         )
         assert response.encode() == data
 
@@ -166,42 +167,42 @@ def test_messages_get_type_response(
     [
         pytest.param(
             constants.CommandId.GET_TYPE.value,
-            codec.ApplicationDataBytes(b"\x00\x00\x04\x06\x01"),
+            bytes.fromhex("0004 0601 00"),
             codec.DataLengthUnexpectedError,
             "GetType response data is of length 5, expected length is 4.",
             id="data longer than 32 bits",
         ),
         pytest.param(
             constants.CommandId.GET_TYPE.value,
-            codec.ApplicationDataBytes(b"\x04\x06\x01"),
+            bytes.fromhex("  04 0601"),
             codec.DataLengthUnexpectedError,
             "GetType response data is of length 3, expected length is 4.",
             id="data shorter than 32 bits",
         ),
         pytest.param(
             constants.CommandId.GET_TYPE.value,
-            codec.ApplicationDataBytes(b""),
+            b"",
             codec.DataLengthUnexpectedError,
             "GetType response data is of length 0, expected length is 4.",
             id="data missing",
         ),
         pytest.param(
             constants.CommandId.GET_TYPE.value,
-            codec.ApplicationDataBytes(b"\x00\x04\x1B\x01"),
+            bytes.fromhex("0004 1B01"),
             codec.OutOfRangeError,
             "Software revision letter (int value) is out of range [1,26]: 27.",
             id="software revision letter out of range (over)",
         ),
         pytest.param(
             constants.CommandId.GET_TYPE.value,
-            codec.ApplicationDataBytes(b"\x00\x04\x00\x01"),
+            bytes.fromhex("0004 0001"),
             codec.OutOfRangeError,
             "Software revision letter (int value) is out of range [1,26]: 0.",
             id="software revision letter out of range (under)",
         ),
         pytest.param(
             constants.CommandId.GET_REGISTER.value,
-            codec.ApplicationDataBytes(b"\x01\x23\x45\x67"),
+            bytes.fromhex("0123 4567"),
             MessageCidMismatchError,
             _wrong_command_id_msg(
                 cid_sent=constants.CommandId.GET_REGISTER.value,
@@ -213,7 +214,7 @@ def test_messages_get_type_response(
 )
 def test_messages_get_type_response_decode_error(
     command_id: int,
-    data_raw: codec.ApplicationDataBytes,
+    data_raw: bytes,
     exc_type: type,
     exc_message: str,
 ) -> None:
@@ -221,7 +222,7 @@ def test_messages_get_type_response_decode_error(
         GetTypeResponse.decode(
             data=codec.ApplicationData(
                 command_id=command_id,
-                data=data_raw,
+                data=codec.ApplicationDataBytes(data_raw),
             )
         )
 
@@ -244,7 +245,8 @@ def test_messages_get_type_response_encode_error_software_revision(
         ),
     ):
         GetTypeResponse(
-            meter_type_bytes=b"\x00\x00", software_revision=software_revision
+            meter_type_bytes=bytes.fromhex("00 00"),
+            software_revision=software_revision,
         ).encode()
 
 
@@ -252,12 +254,12 @@ def test_messages_get_type_response_encode_error_software_revision(
     ("meter_type_bytes", "exc_message"),
     [
         pytest.param(
-            b"\x00\x00\x00",
+            bytes.fromhex("00 00 00"),
             "GetTypeResponse meter type bytes is of length 3, expected length is 2.",
             id="too long",
         ),
         pytest.param(
-            b"\x00",
+            bytes.fromhex("00"),
             "GetTypeResponse meter type bytes is of length 1, expected length is 2.",
             id="too short",
         ),
@@ -329,34 +331,38 @@ def test_messages_get_serial_request_decode_error(
     ("app_bytes", "expected_serial"),
     [
         pytest.param(
-            codec.ApplicationDataBytes(b"\x01\x23\x45\x67"),
+            "01234567",  # noqa: FURB156
             "19088743",
             id="serial-0x01234567",
         ),
         pytest.param(
-            codec.ApplicationDataBytes(b"\x00\x00\x00\x00"),
+            "00000000",
             "0",
             id="serial-0x00000000",
         ),
         pytest.param(
-            codec.ApplicationDataBytes(b"\xFF\xFF\xFF\xFF"),
+            "FFFFFFFF",
             str(2**32 - 1),
             id="serial-0xFFFFFFFF",
         ),
     ],
 )
 def test_messages_get_serial_response(
-    app_bytes: codec.ApplicationDataBytes,
+    app_bytes: str,
     expected_serial: str,
     ensure_no_warnings_logged: util.SimpleContextTest,
 ) -> None:
+    app_bytes_raw = bytes.fromhex(app_bytes)
     with ensure_no_warnings_logged():
         data = codec.ApplicationData(
             command_id=constants.CommandId.GET_SERIAL.value,
-            data=app_bytes,
+            data=codec.ApplicationDataBytes(app_bytes_raw),
         )
         response = GetSerialResponse.decode(data=data)
-        assert response == GetSerialResponse(serial=expected_serial, data_raw=app_bytes)
+        assert response == GetSerialResponse(
+            serial=expected_serial,
+            data_raw=codec.ApplicationDataBytes(app_bytes_raw),
+        )
         assert response.encode() == data
 
 
@@ -365,14 +371,14 @@ def test_messages_get_serial_response(
     [
         pytest.param(
             constants.CommandId.GET_SERIAL.value,
-            codec.ApplicationDataBytes(b"\x01\x23\x45\x67\x89"),
+            bytes.fromhex("0123456789"),  # noqa: FURB156
             codec.DataLengthUnexpectedError,
             "Serial data is of length 5, expected length is 4.",
             id="serial longer than 32 bits",
         ),
         pytest.param(
             constants.CommandId.GET_SERIAL.value,
-            codec.ApplicationDataBytes(b"\x01\x23\x45"),
+            bytes.fromhex("012345"),
             codec.DataLengthUnexpectedError,
             "Serial data is of length 3, expected length is 4.",
             id="serial shorter than 32 bits",
@@ -386,7 +392,7 @@ def test_messages_get_serial_response(
         ),
         pytest.param(
             constants.CommandId.GET_REGISTER.value,
-            codec.ApplicationDataBytes(b"\x01\x23\x45\x67"),
+            bytes.fromhex("01234567"),  # noqa: FURB156
             MessageCidMismatchError,
             _wrong_command_id_msg(
                 cid_sent=constants.CommandId.GET_REGISTER.value,
@@ -398,7 +404,7 @@ def test_messages_get_serial_response(
 )
 def test_messages_get_serial_response_decode_error(
     command_id: int,
-    data_raw: codec.ApplicationDataBytes,
+    data_raw: bytes,
     exc_type: type,
     exc_message: str,
 ) -> None:
@@ -406,7 +412,7 @@ def test_messages_get_serial_response_decode_error(
         GetSerialResponse.decode(
             data=codec.ApplicationData(
                 command_id=command_id,
-                data=data_raw,
+                data=codec.ApplicationDataBytes(data_raw),
             )
         )
 
@@ -445,32 +451,31 @@ def test_messages_get_serial_response_serial_value_invalid(
     ("app_bytes", "expected_register_ids"),
     [
         pytest.param(
-            codec.ApplicationDataBytes(b"\x01\x00\x80"),
+            bytes.fromhex("01 0080"),
             [128],
             id="Kamstrup doc 6.2.4 GetRegister request",
         ),
         pytest.param(
-            codec.ApplicationDataBytes(
-                b"\x08\x00\x36\x00\x37\x00\x38\x00\x39\x00\x3A\x00\x3B\x00\x3C\x00\x3D"
-            ),
+            bytes.fromhex("08 0036 0037 0038 0039 003A 003B 003C 003D"),
             [54, 55, 56, 57, 58, 59, 60, 61],
             id="max number (8) of registers",
         ),
     ],
 )
 def test_messages_get_register_request(
-    app_bytes: codec.ApplicationDataBytes,
+    app_bytes: bytes,
     expected_register_ids: list[int],
     ensure_no_warnings_logged: util.SimpleContextTest,
 ) -> None:
     with ensure_no_warnings_logged():
         data = codec.ApplicationData(
             command_id=constants.CommandId.GET_REGISTER.value,
-            data=app_bytes,
+            data=codec.ApplicationDataBytes(app_bytes),
         )
         request = GetRegisterRequest.decode(data=data)
         assert request == GetRegisterRequest(
-            registers=expected_register_ids, data_raw=app_bytes
+            registers=expected_register_ids,
+            data_raw=codec.ApplicationDataBytes(app_bytes),
         )
         assert request.encode() == data
 
@@ -480,7 +485,7 @@ def test_messages_get_register_request(
     [
         pytest.param(
             constants.CommandId.GET_REGISTER.value,
-            codec.ApplicationDataBytes(b"\x01"),
+            bytes.fromhex("01"),
             codec.DataLengthUnexpectedError,
             (
                 "GetRegister request data for 1 register ID(s) is of length 0, "
@@ -490,7 +495,7 @@ def test_messages_get_register_request(
         ),
         pytest.param(
             constants.CommandId.GET_REGISTER.value,
-            codec.ApplicationDataBytes(b"\x03\x00\x36\x00\x37"),
+            bytes.fromhex("03 0036 0037"),
             codec.DataLengthUnexpectedError,
             (
                 "GetRegister request data for 3 register ID(s) is of length 4, "
@@ -507,7 +512,7 @@ def test_messages_get_register_request(
         ),
         pytest.param(
             constants.CommandId.GET_SERIAL.value,
-            codec.ApplicationDataBytes(b"\x01\x23\x45\x67"),
+            bytes.fromhex("01234567"),  # noqa: FURB156
             MessageCidMismatchError,
             _wrong_command_id_msg(
                 cid_sent=constants.CommandId.GET_SERIAL.value,
@@ -519,7 +524,7 @@ def test_messages_get_register_request(
 )
 def test_messages_get_register_request_decode_error(
     command_id: int,
-    data_raw: codec.ApplicationDataBytes,
+    data_raw: bytes,
     exc_type: type,
     exc_message: str,
 ) -> None:
@@ -527,7 +532,7 @@ def test_messages_get_register_request_decode_error(
         GetRegisterRequest.decode(
             data=codec.ApplicationData(
                 command_id=command_id,
-                data=data_raw,
+                data=codec.ApplicationDataBytes(data_raw),
             )
         )
 
@@ -536,7 +541,7 @@ def test_messages_get_register_request_decode_error(
     ("data_raw", "expected_log_message"),
     [
         pytest.param(
-            codec.ApplicationDataBytes(b"\x00"),
+            bytes.fromhex("00"),
             (
                 "Number of registers (0) in GetRegister request is outside the defined "
                 "range (1-8)."
@@ -544,10 +549,7 @@ def test_messages_get_register_request_decode_error(
             id="zero length",
         ),
         pytest.param(
-            codec.ApplicationDataBytes(
-                b"\x09\x00\x36\x00\x37\x00\x38\x00\x39\x00\x3A\x00\x3B\x00\x3C\x00\x3D"
-                b"\x00\x3E"
-            ),
+            bytes.fromhex("09 0036 0037 0038 0039 003A 003B 003C 003D 003E"),
             (
                 "Number of registers (9) in GetRegister request is outside the defined "
                 "range (1-8)."
@@ -557,7 +559,7 @@ def test_messages_get_register_request_decode_error(
     ],
 )
 def test_messages_get_register_request_decode_length_out_of_range_warning(
-    data_raw: codec.ApplicationDataBytes,
+    data_raw: bytes,
     expected_log_message: str,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
@@ -565,7 +567,7 @@ def test_messages_get_register_request_decode_length_out_of_range_warning(
         request = GetRegisterRequest.decode(
             data=codec.ApplicationData(
                 command_id=constants.CommandId.GET_REGISTER.value,
-                data=data_raw,
+                data=codec.ApplicationDataBytes(data_raw),
             )
         )
     expected_num_registers = data_raw[0]
@@ -639,12 +641,12 @@ def test_messages_get_register_request_register_value_invalid(
     ("app_bytes", "expected_register_data"),
     [
         pytest.param(
-            codec.ApplicationDataBytes(b"\x00\x80\x16\x04\x11\x01\x2A\xF0\x24"),
+            bytes.fromhex("0080 16 04 11 012AF024"),
             {
                 RegisterData(
                     id_=RegisterID(128),
                     unit=RegisterUnit(0x16),
-                    value=RegisterValueBytes(b"\x04\x11\x01\x2A\xF0\x24"),
+                    value=RegisterValueBytes(bytes.fromhex("04 11 012AF024")),
                 ),
             },
             id="Kamstrup doc 6.2.4 GetRegister response",
@@ -657,14 +659,14 @@ def test_messages_get_register_request_register_value_invalid(
     ],
 )
 def test_messages_get_register_response(
-    app_bytes: codec.ApplicationDataBytes,
+    app_bytes: bytes,
     expected_register_data: set[RegisterData],
     ensure_no_warnings_logged: util.SimpleContextTest,
 ) -> None:
     with ensure_no_warnings_logged():
         data = codec.ApplicationData(
             command_id=constants.CommandId.GET_REGISTER.value,
-            data=app_bytes,
+            data=codec.ApplicationDataBytes(app_bytes),
         )
         response = GetRegisterResponse.decode(data=data)
 
@@ -672,7 +674,7 @@ def test_messages_get_register_response(
             r.id_: r for r in expected_register_data
         }
         assert response == GetRegisterResponse(
-            registers=expected_registers, data_raw=app_bytes
+            registers=expected_registers, data_raw=codec.ApplicationDataBytes(app_bytes)
         )
         assert response.encode() == data
 
@@ -682,7 +684,7 @@ def test_messages_get_register_response(
     [
         pytest.param(
             constants.CommandId.GET_REGISTER.value,
-            codec.ApplicationDataBytes(b"\x00\x80\x16\x04\x11\x01\x2A\xF0"),
+            bytes.fromhex("0080 16 04 11 012AF0"),
             codec.DataLengthUnexpectedError,
             (
                 "Register value data left in buffer is of length 8, expected length is "
@@ -692,7 +694,7 @@ def test_messages_get_register_response(
         ),
         pytest.param(
             constants.CommandId.GET_REGISTER.value,
-            codec.ApplicationDataBytes(b"\x00\x80\x16\x04\x11"),
+            bytes.fromhex("0080 16 04 11"),
             codec.DataLengthUnexpectedError,
             (
                 "Data to decode register data is of length 5, expected length is 6 at "
@@ -702,7 +704,7 @@ def test_messages_get_register_response(
         ),
         pytest.param(
             constants.CommandId.GET_REGISTER.value,
-            codec.ApplicationDataBytes(b"\x00\x80\x16\x04\x11\x01\x2A\xF0\x24\x01"),
+            bytes.fromhex("0080 16 04 11 012AF024 FF"),
             codec.DataLengthUnexpectedError,
             (
                 "Data to decode register data is of length 1, expected length is 6 at "
@@ -712,7 +714,7 @@ def test_messages_get_register_response(
         ),
         pytest.param(
             constants.CommandId.GET_SERIAL.value,
-            codec.ApplicationDataBytes(b"\x01\x23\x45\x67"),
+            bytes.fromhex("01234567"),  # noqa: FURB156
             MessageCidMismatchError,
             _wrong_command_id_msg(
                 cid_sent=constants.CommandId.GET_SERIAL.value,
@@ -724,7 +726,7 @@ def test_messages_get_register_response(
 )
 def test_messages_get_register_response_decode_error(
     command_id: int,
-    app_bytes: codec.ApplicationDataBytes,
+    app_bytes: bytes,
     exc_type: type,
     exc_message: str,
 ) -> None:
@@ -732,7 +734,7 @@ def test_messages_get_register_response_decode_error(
         GetRegisterResponse.decode(
             data=codec.ApplicationData(
                 command_id=command_id,
-                data=app_bytes,
+                data=codec.ApplicationDataBytes(app_bytes),
             )
         )
 
@@ -741,12 +743,12 @@ def test_messages_get_register_response_decode_error(
     ("app_bytes", "expected_register_data", "expected_log_message"),
     [
         pytest.param(
-            codec.ApplicationDataBytes(b"\x00\x80\x16\x04\x11\x01\x2A\xF0\x24" * 2),
+            bytes.fromhex("0080 16 04 11 012AF024") * 2,
             {
                 RegisterData(
                     id_=RegisterID(128),
                     unit=RegisterUnit(0x16),
-                    value=RegisterValueBytes(b"\x04\x11\x01\x2A\xF0\x24"),
+                    value=RegisterValueBytes(bytes.fromhex("04 11 01 2A F0 24")),
                 ),
             },
             "Duplicate register ID 128 in response, overwriting value.",
@@ -755,7 +757,7 @@ def test_messages_get_register_response_decode_error(
     ],
 )
 def test_messages_get_register_response_decode_warning(
-    app_bytes: codec.ApplicationDataBytes,
+    app_bytes: bytes,
     expected_register_data: set[RegisterData],
     expected_log_message: str,
     caplog: pytest.LogCaptureFixture,
@@ -764,7 +766,7 @@ def test_messages_get_register_response_decode_warning(
         response = GetRegisterResponse.decode(
             data=codec.ApplicationData(
                 command_id=constants.CommandId.GET_REGISTER.value,
-                data=app_bytes,
+                data=codec.ApplicationDataBytes(app_bytes),
             )
         )
     expected_registers: dict[RegisterID, RegisterData] = {

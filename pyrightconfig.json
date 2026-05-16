@@ -1,0 +1,16 @@
+{
+    "typeCheckingMode": "strict",
+    "include": [
+        "src",
+        "tests"
+    ],
+    "exclude": [
+        ".venv",
+        ".pytest_cache",
+        ".pytest-cov",
+        ".ruff_cache",
+        ".mypy_cache",
+        "dist",
+        "site"
+    ]
+}

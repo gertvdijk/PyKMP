@@ -135,7 +135,7 @@ def get_serial(ctx: click.Context) -> None:
     common_options: ClickContextObj = ctx.obj
     communicator = client.PySerialClientCommunicator(
         serial_device=common_options.serial_device
-    )  # pyright: ignore[reportGeneralTypeIssues]
+    )
     try:
         response = communicator.send_request(
             message=messages.GetSerialRequest(),
@@ -265,7 +265,7 @@ def get_register(
     common_options: ClickContextObj = ctx.obj
     communicator = client.PySerialClientCommunicator(
         serial_device=common_options.serial_device
-    )  # pyright: ignore[reportGeneralTypeIssues]
+    )
     request = messages.GetRegisterRequest(
         registers=[messages.RegisterID(rid) for rid in register]
     )

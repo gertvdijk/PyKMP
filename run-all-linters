@@ -20,15 +20,15 @@ PYTHON_SOURCES_DIRS=(
 
 echo
 echo "Ruff..."
-"$PYTHON" -m ruff --diff "${PYTHON_SOURCES_DIRS[@]}" || \
-    (echo "Run 'ruff --fix ${PYTHON_SOURCES_DIRS[*]}' to fix auto-fixable."; exit 1)
-# Also lint for non-auto-fixables - requires a separate invocation apparently.
-"$PYTHON" -m ruff "${PYTHON_SOURCES_DIRS[@]}"
+"$PYTHON" -m ruff check --diff "${PYTHON_SOURCES_DIRS[@]}" || \
+    (echo "Run 'ruff check --fix ${PYTHON_SOURCES_DIRS[*]}' to fix auto-fixable."; exit 1)
+# `ruff check --diff` (above) implies `--fix-only`, so it only reports auto-fixable
+# changes. Requires a second pass to surface non-fixable violations too.
+"$PYTHON" -m ruff check "${PYTHON_SOURCES_DIRS[@]}"
 echo "OK!"
 
-# Black options are specified in pyproject.toml.
-echo "black..."
-"$PYTHON" -m black --check --diff . || (echo "Run 'black .' to fix."; exit 1)
+echo "Ruff format..."
+"$PYTHON" -m ruff format --diff || (echo "Run 'ruff format' to fix."; exit 1)
 echo "OK!"
 
 # Other than '--cache-dir=/dev/null', mypy options are specified in pyproject.toml.
@@ -38,8 +38,12 @@ echo "OK!"
 # disable cache explicitly for this script.
 echo "mypy (PyKMP package)..."
 "$PYTHON" -m mypy --cache-dir=/dev/null --package pykmp
-# echo "mypy (PyKMP tests folder)..."
+echo "mypy (PyKMP tests folder)..."
 "$PYTHON" -m mypy --cache-dir=/dev/null ./tests
+echo "OK!"
+
+echo "Pyright..."
+"$PYTHON" -m pyright
 echo "OK!"
 
 echo "REUSE lint..."

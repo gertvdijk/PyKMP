@@ -19,48 +19,49 @@ the owners of this repository before making a change.
     `git clone https://github.com/gertvdijk/PyKMP.git`) and change your current
     directory in the project root.
 
-1. Create a clean Python 3.10.x/3.11.x/3.12.x virtual environment and activate it.
-    Suggested way is to install [direnv][direnv-home] together with
-    [Pyenv][pyenv-github] and enable the project-supplied example `.envrc`.
+1. Install [`uv`][uv-home]. It manages Python installations, virtual environments and
+    development dependencies for this repository.
 
     ```console
-    $ ln -s .envrc-example .envrc
-    $ direnv allow
+    $ uv --version
     ```
 
-1. Make sure the base Python packages such as `pip`, `setuptools` and `setuptools-scm`
-    are up-to-date *inside this virtualenv*.
+1. Create a local virtual environment for the project. Pick any supported interpreter
+    version (3.10 - 3.14), e.g. for 3.12.x:
 
     ```console
-    $ pip install --upgrade pip setuptools setuptools-scm[toml]
+    $ uv python install 3.12
+    $ uv venv --python 3.12
     ```
 
-1. This should list zero outdated packages at this point:
+1. Sync the editable package and all development dependencies into `.venv/`.
 
     ```console
-    $ pip list --outdated
+    $ uv sync
     ```
 
-1. Install the project with development dependencies with this virtualenv active. E.g.:
+1. Verify that all tests pass.
 
     ```console
-    $ pip install -e .[development]
-    ```
-
-1. Verify that all tests pass by running `pytest`.
-
-    ```console
-    $ pytest
+    $ uv run pytest
     [...]
-    ==== 117 passed in 0.21s ====
+    ==== 118 passed in 0.21s ====
     ```
 
 1. Verify that you can run the `run-all-linters` script.
 
     ```console
-    $ ./run-all-linters
+    $ uv run ./run-all-linters
     [...]
     Everything looks OK! 🎉
+    ```
+
+1. Verify that you can build the documentation.
+
+    ```console
+    $ uv run zensical build
+    [...]
+    INFO    -  Documentation built in 0.65 seconds
     ```
 
 1. You're ready to contribute your changes now!
@@ -79,21 +80,21 @@ Any custom settings desired which aren't for all projects and neither should be 
 this project can then be set to the workspace (local) level.
 
 In order for the extensions to work correctly, please
-[select the Python interpreter][ms-vscode-select-python] of the virtualenv you created,
-e.g. `.direnv/python-3.11/bin/python`.
+[select the Python interpreter][ms-vscode-select-python] from the uv-managed virtual
+environment, e.g. `.venv/bin/python`.
 
 Please set `ruff.importStrategy` to `fromEnvironment` in your workspace (or user)
 settings to use the same Ruff version as in the virtual environment.
 The Ruff plugin uses the bundled version by default.
 
-All linters and type checkers will run inside this environment created with
-specific versions specified rather than relying on whatever is available system-wide.
+All linters and type checkers will run inside this environment, using the project's
+pinned tool versions instead of whatever is available system-wide.
 
 !!! tip "Automatic on-save formatting"
 
     If you like, enable automatic on-save formatting with project-provided settings
     using the user/profile-level setting `editor.formatOnSave`.
-    It will run `black` for you whenever hitting *Save* on a file.
+    It will run `ruff format` for you whenever hitting *Save* on a file.
 
 ## Add yourself as contributor
 
@@ -137,14 +138,14 @@ copyright, for example automated reformatting or changing the name of a variable
     interactive rebase to craft a set of contained commits.
 1. Ensure that your fork's branch is based off with latest upstream `develop` branch.
     If not, fetch latest changes and *rebase* it.
-1. Run the `run-all-linters` script to ensure all code adheres to the code style, strict
+1. Run `uv run ./run-all-linters` to ensure all code adheres to the code style, strict
     typing requirements and licensing headers.
-1. Run `pytest` to ensure your code changes do not break current tests (adjust if
+1. Run `uv run pytest` to ensure your code changes do not break current tests (adjust if
     necessary) and your newly introduced lines are all covered by new/adjusted tests
     (compare coverage output).
 1. All ready?!
     Create a pull request targeting the `develop` branch.
-    Write a title that consicely describes the main aim of the changes in the request.
+    Write a title that concisely describes the main aim of the changes in the request.
     Consider to tick the *"Allow edits by maintainers"* checkbox (see below).
 1. Please allow the maintainer to take the time to review and test the code.
     In case code changes are requested, please amend the commit(s) affected and update
@@ -211,8 +212,7 @@ Notes:
 
 [github-new-issue]: https://github.com/gertvdijk/PyKMP/issues/new/choose
 [github-new-discussion]: https://github.com/gertvdijk/PyKMP/discussions/new
-[direnv-home]: https://direnv.net/
-[pyenv-github]: https://github.com/pyenv/pyenv
+[uv-home]: https://docs.astral.sh/uv/
 [ms-vscode-home]: https://code.visualstudio.com/
 [ms-vscode-select-python]: https://code.visualstudio.com/docs/python/environments#_work-with-python-interpreters
 [github-draft-pr-howto]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests#draft-pull-requests
